@@ -1,0 +1,41 @@
+@import url('../fonts.css');
+
+:root {
+  --font-gt-pro-light: 'GT Eesti Pro Display-light', sans-serif, serif;
+  --font-gt-pro-regular: 'GT Eesti Pro Display-regular', sans-serif, serif;
+  --font-gt-pro-bold: 'GT Eesti Pro Display-bold', sans-serif, serif;
+
+  --color-brand-white: #ffffff;
+  --color-brand-dark: #1a1a1a;
+  --color-brand-gray: #f5f5f5;
+  --color-brand-dark-gray: #2a2a2a;
+
+  --color-cream: #F1EBDC;
+  --color-paper: #FBF8F1;
+  --color-ink: #2A2D26;
+  --color-ink-soft: #5C5E51;
+  --color-green: #4F6B52;
+  --color-green-deep: #33492F;
+  --color-green-mist: #DDE6D2;
+  --color-muted: #8E8E7C;
+  --color-ball: #C9E04A;
+}
+
+.heroPerspective {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.glassPanel {
+  background: rgba(42, 42, 42, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.textGradient {
+  background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
