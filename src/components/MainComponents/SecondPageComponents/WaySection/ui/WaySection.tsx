@@ -14,63 +14,71 @@ interface IPoint {
   y: number;
 }
 
+type Side = 'right' | 'left' | 'center';
+
 interface ITimelineItem {
   year: string;
   role: string;
   meta: string;
   point: IPoint;
   progress: number;
-  side: 'left' | 'right';
+  side: Side;
 }
 
-const VIEWBOX_W = 100;
-const VIEWBOX_H = 160;
+const VIEWBOX_W = 1000;
+const VIEWBOX_H = 1400;
 
 const PATH_D =
-  'M50 4 C50 10 28 10 28 16 C28 33 72 33 72 50 C72 67 28 67 28 84 C28 101 72 101 72 118 C72 134 28 134 28 150';
+  'M250 250 Q560 120 750 470 Q460 540 250 700 Q560 760 750 930 Q470 1010 500 1150';
 
 const TIMELINE: ITimelineItem[] = [
   {
     year: '2018 — 2020',
     role: 'Тренер по теннису, клуб Viccourt',
     meta: 'г. Евпатория',
-    point: { x: 28, y: 16 },
-    progress: 0.1,
-    side: 'left',
+    point: { x: 250, y: 250 },
+    progress: 0.06,
+    side: 'right',
   },
   {
     year: 'Июнь — июль 2019',
     role: 'Тренер Федерации тенниса России',
     meta: 'Международный детский центр «Артек»',
-    point: { x: 72, y: 50 },
-    progress: 0.32,
-    side: 'right',
+    point: { x: 750, y: 470 },
+    progress: 0.28,
+    side: 'left',
   },
   {
     year: '2021 — 2024',
     role: 'Тренер Федерации тенниса Республики Татарстан',
     meta: 'Казанская академия тенниса · дети от 3 до 5 лет',
-    point: { x: 28, y: 84 },
-    progress: 0.52,
-    side: 'left',
-  },
-  {
-    year: '2023 — 2024',
-    role: 'Тренер экспериментальных групп Республики Татарстан',
-    meta: 'Казанская академия тенниса · дети 2013–2017 годов рождения',
-    point: { x: 72, y: 118 },
-    progress: 0.74,
+    point: { x: 250, y: 700 },
+    progress: 0.5,
     side: 'right',
   },
   {
-    year: 'С 2024 — по сей день',
-    role: 'Тренер теннисного клуба «Пироговский»',
-    meta: 'Работаем здесь сейчас — приходите знакомиться',
-    point: { x: 28, y: 150 },
-    progress: 0.96,
+    year: '2023 — 2024',
+    role: 'Тренер экспериментальных групп',
+    meta: 'Казанская академия тенниса · дети 2013–2017 годов рождения',
+    point: { x: 750, y: 930 },
+    progress: 0.72,
     side: 'left',
   },
+  {
+    year: 'С 2024 — по сей день',
+    role: 'Тренер клуба «Пироговский»',
+    meta: 'Работаем здесь сейчас — приходите знакомиться',
+    point: { x: 500, y: 1150 },
+    progress: 0.94,
+    side: 'center',
+  },
 ];
+
+const SIDE_CLASS: Record<Side, string> = {
+  right: cls.stopRight,
+  left: cls.stopLeft,
+  center: cls.stopCenter,
+};
 
 interface ICourtNodeProps {
   point: IPoint;
@@ -79,22 +87,22 @@ interface ICourtNodeProps {
 }
 
 const CourtNode = ({ point, progress, scrollYProgress }: ICourtNodeProps) => {
-  const opacity = useTransform(scrollYProgress, [progress - 0.09, progress], [0.18, 1]);
-  const ringOpacity = useTransform(scrollYProgress, [progress - 0.09, progress], [0, 0.55]);
+  const opacity = useTransform(scrollYProgress, [progress - 0.06, progress], [0.2, 1]);
+  const ringOpacity = useTransform(scrollYProgress, [progress - 0.06, progress], [0, 0.55]);
 
   return (
     <g>
       <motion.circle
         cx={point.x}
         cy={point.y}
-        r={5}
+        r={16}
         className={classNames(cls.nodeRing, {}, [])}
         style={{ opacity: ringOpacity }}
       />
       <motion.circle
         cx={point.x}
         cy={point.y}
-        r={2.4}
+        r={8}
         className={classNames(cls.node, {}, [])}
         style={{ opacity }}
       />
@@ -103,23 +111,20 @@ const CourtNode = ({ point, progress, scrollYProgress }: ICourtNodeProps) => {
 };
 
 const cardVariants = {
-  hidden: (side: 'left' | 'right') => ({
-    opacity: 0,
-    x: side === 'left' ? -44 : 44,
-  }),
+  hidden: { opacity: 0, y: 22 },
   visible: {
     opacity: 1,
-    x: 0,
+    y: 0,
     transition: { duration: 0.7, ease: [0.23, 1, 0.36, 1] as const },
   },
 };
 
 export const WaySection = ({ className }: IWaySection) => {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
-    target: trackRef,
-    offset: ['start 0.78', 'end 0.62'],
+    target: fieldRef,
+    offset: ['start 0.8', 'end 0.62'],
   });
 
   const ballDistance = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
@@ -129,31 +134,31 @@ export const WaySection = ({ className }: IWaySection) => {
       <div className={classNames(cls.container, {}, [])}>
         <TitleSecondPage
           title='Путь на корте'
-          subtitle='Семь лет тренерской работы — от детских лагерей Крыма до академий и
-            клубов.'
+          subtitle='Семь лет тренерской работы — от детских лагерей Крыма до академий и клубов.'
           isWhite={true}
         />
 
-        <div ref={trackRef} className={classNames(cls.track, {}, [])}>
-          <div className={classNames(cls.court, {}, [])} aria-hidden="true">
-            <span className={classNames(cls.courtSingleLeft, {}, [])} />
-            <span className={classNames(cls.courtSingleRight, {}, [])} />
-            <span className={classNames(cls.courtServiceTop, {}, [])} />
-            <span className={classNames(cls.courtServiceBottom, {}, [])} />
-            <span className={classNames(cls.courtCenter, {}, [])} />
-            <span className={classNames(cls.courtNet, {}, [])} />
-          </div>
-
+        <div ref={fieldRef} className={classNames(cls.field, {}, [])}>
           <svg
             className={classNames(cls.svg, {}, [])}
             viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
-            preserveAspectRatio="xMidYMid meet"
-            aria-hidden="true"
+            preserveAspectRatio='xMidYMid meet'
+            aria-hidden='true'
           >
-            <path d={PATH_D} className={classNames(cls.trajectoryGhost, {}, [])} />
+            <rect x={130} y={70} width={740} height={1260} rx={4} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={210} y1={70} x2={210} y2={1330} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={790} y1={70} x2={790} y2={1330} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={210} y1={470} x2={790} y2={470} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={210} y1={930} x2={790} y2={930} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={500} y1={470} x2={500} y2={930} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={490} y1={70} x2={510} y2={70} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={490} y1={1330} x2={510} y2={1330} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={95} y1={700} x2={905} y2={700} className={classNames(cls.courtNet, {}, [])} />
+
+            <path d={PATH_D} className={classNames(cls.routeGhost, {}, [])} />
             <motion.path
               d={PATH_D}
-              className={classNames(cls.trajectory, {}, [])}
+              className={classNames(cls.routeTrail, {}, [])}
               style={{ pathLength: scrollYProgress }}
             />
 
@@ -166,31 +171,35 @@ export const WaySection = ({ className }: IWaySection) => {
               />
             ))}
 
-            <motion.g
-              style={{ offsetPath: `path("${PATH_D}")`, offsetDistance: ballDistance }}
-            >
-              <circle r={4.2} className={classNames(cls.ballGlow, {}, [])} />
-              <circle r={2.6} className={classNames(cls.ball, {}, [])} />
-              <path d="M-2.4 -1 Q0 1.4 2.4 -1" className={classNames(cls.ballSeam, {}, [])} />
+            <motion.g style={{ offsetPath: `path("${PATH_D}")`, offsetDistance: ballDistance }}>
+              <circle r={22} className={classNames(cls.ballGlow, {}, [])} />
+              <circle r={12} className={classNames(cls.ball, {}, [])} />
+              <path d='M-8 -3 Q0 5 8 -3' className={classNames(cls.ballSeam, {}, [])} />
             </motion.g>
           </svg>
 
-          <ul className={classNames(cls.cards, {}, [])}>
+          <ul className={classNames(cls.stops, {}, [])}>
             {TIMELINE.map((item) => (
-              <motion.li
+              <li
                 key={item.year}
-                className={classNames(cls.card, { [cls.cardRight]: item.side === 'right' }, [])}
-                style={{ top: `${(item.point.y / VIEWBOX_H) * 100}%` }}
-                custom={item.side}
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={VIEWPORT_ONCE}
+                className={classNames(cls.stop, {}, [SIDE_CLASS[item.side]])}
+                style={{
+                  left: `${(item.point.x / VIEWBOX_W) * 100}%`,
+                  top: `${(item.point.y / VIEWBOX_H) * 100}%`,
+                }}
               >
-                <span className={classNames(cls.year, {}, [])}>{item.year}</span>
-                <span className={classNames(cls.role, {}, [])}>{item.role}</span>
-                <span className={classNames(cls.meta, {}, [])}>{item.meta}</span>
-              </motion.li>
+                <motion.div
+                  className={classNames(cls.card, {}, [])}
+                  variants={cardVariants}
+                  initial='hidden'
+                  whileInView='visible'
+                  viewport={VIEWPORT_ONCE}
+                >
+                  <span className={classNames(cls.year, {}, [])}>{item.year}</span>
+                  <span className={classNames(cls.role, {}, [])}>{item.role}</span>
+                  <span className={classNames(cls.meta, {}, [])}>{item.meta}</span>
+                </motion.div>
+              </li>
             ))}
           </ul>
         </div>

@@ -1,7 +1,7 @@
 .section {
   position: relative;
   overflow: hidden;
-  padding: 130px 0 140px;
+  padding: 120px 0 110px;
   background: var(--color-green-deep);
   color: #F4F7F2;
 }
@@ -13,148 +13,55 @@
   padding: 0 48px;
 }
 
-.head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
-  color: var(--color-ball);
-}
-
-.headRule {
-  width: 40px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.7;
-}
-
-.headLabel {
-  font-family: var(--font-gt-pro-bold);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-}
-
-.title {
-  margin: 0;
-  font-family: var(--font-gt-pro-bold);
-  font-weight: 600;
-  font-size: clamp(40px, 4.6vw, 64px);
-  line-height: 1.04;
-  text-transform: uppercase;
-  color: #ffffff;
-}
-
-.sub {
-  margin: 20px 0 0;
-  max-width: 480px;
-  font-family: var(--font-gt-pro-regular);
-  font-size: 16px;
-  line-height: 1.65;
-  color: rgba(244, 247, 242, 0.62);
-  text-wrap: pretty;
-}
-
-.track {
+.field {
   position: relative;
-  width: 100%;
-  max-width: 880px;
-  margin: 80px auto 0;
-}
-
-.court {
-  position: absolute;
-  top: 0;
-  left: 8%;
-  right: 8%;
-  bottom: 0;
-  border: 2px solid rgba(244, 247, 242, 0.16);
-  border-radius: 2px;
-}
-
-.courtSingleLeft,
-.courtSingleRight {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(244, 247, 242, 0.12);
-}
-
-.courtSingleLeft {
-  left: 14%;
-}
-
-.courtSingleRight {
-  right: 14%;
-}
-
-.courtServiceTop,
-.courtServiceBottom {
-  position: absolute;
-  left: 14%;
-  right: 14%;
-  height: 1px;
-  background: rgba(244, 247, 242, 0.12);
-}
-
-.courtServiceTop {
-  top: 28%;
-}
-
-.courtServiceBottom {
-  bottom: 28%;
-}
-
-.courtCenter {
-  position: absolute;
-  top: 28%;
-  bottom: 28%;
-  left: 50%;
-  width: 1px;
-  margin-left: -1px;
-  background: rgba(244, 247, 242, 0.12);
-}
-
-.courtNet {
-  position: absolute;
-  top: 50%;
-  left: -2px;
-  right: -2px;
-  height: 2px;
-  margin-top: -1px;
-  background: rgba(201, 224, 74, 0.32);
+  width: 92%;
+  max-width: 1080px;
+  margin: 84px auto 0;
+  aspect-ratio: 1000 / 1400;
 }
 
 .svg {
-  position: relative;
-  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
   overflow: visible;
-  z-index: 1;
+  display: block;
 }
 
-.trajectoryGhost {
+.courtLine {
   fill: none;
-  stroke: rgba(244, 247, 242, 0.14);
-  stroke-width: 0.5;
-  stroke-linecap: round;
+  stroke: rgba(244, 247, 242, 0.16);
+  stroke-width: 2;
 }
 
-.trajectory {
+.courtNet {
+  fill: none;
+  stroke: rgba(244, 247, 242, 0.28);
+  stroke-width: 2;
+  stroke-dasharray: 5 7;
+}
+
+.routeGhost {
+  fill: none;
+  stroke: rgba(201, 224, 74, 0.2);
+  stroke-width: 2.5;
+}
+
+.routeTrail {
   fill: none;
   stroke: var(--color-ball);
-  stroke-width: 0.7;
+  stroke-width: 6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 2px rgba(201, 224, 74, 0.45));
+  filter: drop-shadow(0 0 6px rgba(201, 224, 74, 0.55));
 }
 
 .nodeRing {
   fill: none;
   stroke: var(--color-ball);
-  stroke-width: 0.5;
+  stroke-width: 2.5;
 }
 
 .node {
@@ -167,16 +74,17 @@
 
 .ball {
   fill: var(--color-ball);
+  filter: drop-shadow(0 0 10px rgba(201, 224, 74, 0.85));
 }
 
 .ballSeam {
   fill: none;
-  stroke: rgba(51, 73, 47, 0.65);
-  stroke-width: 0.4;
+  stroke: rgba(51, 73, 47, 0.7);
+  stroke-width: 2;
   stroke-linecap: round;
 }
 
-.cards {
+.stops {
   position: absolute;
   top: 0;
   left: 0;
@@ -185,75 +93,77 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  z-index: 2;
+}
+
+.stop {
+  position: absolute;
+  width: 300px;
+}
+
+.stopRight {
+  transform: translate(5%, -50%);
+}
+
+.stopLeft {
+  transform: translate(-105%, -50%);
+}
+
+.stopCenter {
+  transform: translate(-50%, 10%);
 }
 
 .card {
-  position: absolute;
-  left: 0;
-  width: 40%;
-  transform: translateY(-50%);
-  text-align: right;
-  padding-top: 40px;
-  padding-right: 24px;
-}
-
-.cardRight {
-  left: auto;
-  right: 0;
-  text-align: left;
-  padding-right: 0;
-  padding-left: 24px;
+  background: rgba(9, 30, 19, 0.72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(201, 224, 74, 0.28);
+  border-radius: 18px;
+  padding: 22px 24px 24px;
 }
 
 .year {
   display: block;
   font-family: var(--font-gt-pro-bold);
-  font-weight: 600;
-  font-size: 26px;
-  line-height: 1.1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
   color: var(--color-ball);
 }
 
 .role {
   display: block;
-  margin-top: 10px;
+  margin-top: 12px;
   font-family: var(--font-gt-pro-bold);
-  font-size: 17px;
   font-weight: 600;
-  line-height: 1.4;
+  font-size: 21px;
+  line-height: 1.15;
+  text-transform: uppercase;
   color: #ffffff;
-  text-wrap: pretty;
+  text-wrap: balance;
 }
 
 .meta {
   display: block;
-  margin-top: 6px;
+  margin-top: 9px;
   font-family: var(--font-gt-pro-regular);
   font-size: 14px;
   line-height: 1.55;
-  color: rgba(244, 247, 242, 0.6);
+  color: rgba(244, 247, 242, 0.66);
   text-wrap: pretty;
 }
 
-@media (max-width: 900px) {
-  .card {
-    width: 42%;
-    padding-right: 16px;
+@media (max-width: 1024px) {
+  .field {
+    width: 96%;
   }
 
-  .cardRight {
-    padding-left: 16px;
-  }
-
-  .year {
-    font-size: 22px;
+  .stop {
+    width: 260px;
   }
 
   .role {
-    font-size: 16px;
+    font-size: 19px;
   }
 }
 
@@ -266,35 +176,43 @@
     padding: 0 24px;
   }
 
-  .track {
+  .field {
+    width: 100%;
+    aspect-ratio: auto;
     margin-top: 56px;
   }
 
-  .court,
   .svg {
     display: none;
   }
 
-  .cards {
+  .stops {
     position: static;
   }
 
-  .card {
+  .stop,
+  .stopRight,
+  .stopLeft,
+  .stopCenter {
     position: static;
     width: 100%;
     transform: none;
-    text-align: left;
-    padding: 0 0 0 24px;
-    margin-bottom: 48px;
+    padding-left: 22px;
+    margin-bottom: 40px;
     border-left: 2px solid rgba(201, 224, 74, 0.4);
   }
 
-  .card:last-child {
+  .stop:last-child {
     margin-bottom: 0;
   }
+}
 
-  .cardRight {
-    padding: 0 0 0 24px;
-    text-align: left;
+@media (max-width: 480px) {
+  .card {
+    padding: 18px 18px 20px;
+  }
+
+  .role {
+    font-size: 18px;
   }
 }
