@@ -130,7 +130,7 @@ export const WaySection = ({ className }: IWaySection) => {
   const ballDistance = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
   return (
-    <section className={classNames(cls.section, {}, [className ?? ''])}>
+    <section id="experience" className={classNames(cls.section, {}, [className ?? ''])}>
       <div className={classNames(cls.container, {}, [])}>
         <TitleSecondPage
           title='Путь на корте'

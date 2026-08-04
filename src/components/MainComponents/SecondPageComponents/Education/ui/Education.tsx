@@ -189,7 +189,7 @@ export const Education = ({ className }: IEducationProps) => {
   };
 
   return (
-    <section className={classNames(cls.section, {}, [className ?? ''])}>
+    <section id="education" className={classNames(cls.section, {}, [className ?? ''])}>
       <div className={classNames(cls.container, {}, [])}>
         <TitleSecondPage
           title='Дипломы и квалификация'
