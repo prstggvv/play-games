@@ -6,6 +6,7 @@ import { WaySection } from '../../../components/MainComponents/SecondPageCompone
 import { Education } from '../../../components/MainComponents/SecondPageComponents/Education';
 import { Footer } from '../../../components/MainComponents/Footer';
 import { ContactSection } from '../../../components/MainComponents/SecondPageComponents/ContactSection';
+import { UnderFooter } from '../../../components/MainComponents/SecondPageComponents/UnderFooter';
 
 interface ISecondMainPageAsync {
   className?: string;
@@ -13,14 +14,18 @@ interface ISecondMainPageAsync {
 
 const MainPage = ({ className }: ISecondMainPageAsync) => {
   return (
-    <main className={classNames(cls.content, {}, [className ?? ''])}>
-      <HeroSecondSection />
-      <AboutUsSection />
-      <WaySection />
-      <Education />
-      <ContactSection />
-      <Footer />
-    </main>
+    <>
+      <main className={classNames(cls.content, {}, [className ?? ''])}>
+        <HeroSecondSection />
+        <AboutUsSection />
+        <WaySection />
+        <Education />
+        <ContactSection />
+        <Footer />
+      </main>
+
+      <UnderFooter />
+    </>
   )
 };
 
