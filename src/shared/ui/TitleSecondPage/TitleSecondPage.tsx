@@ -1,7 +1,18 @@
+import { useRef } from 'react';
 import cls from './TitleSecondPage.module.css'
 import { classNames } from '../../lib/classNames/classNames';
-import { fadeUp, VIEWPORT_ONCE } from '../../lib/motion';
-import { motion } from 'framer-motion';
+import {
+  gsap,
+  useGSAP,
+  isMotionDisabled,
+  splitLines,
+  splitWords,
+  revertSplits,
+  LINES_FROM,
+  WORDS_FROM,
+  START,
+} from '../../lib/gsap';
+import { useFontsReady } from '../../lib/hooks/useFontsReady';
 
 interface ITitleSecondPage {
   className?: string;
@@ -16,22 +27,50 @@ const TitleSecondPage = ({
   subtitle,
   isWhite,
 }: ITitleSecondPage) => {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const introRef = useRef<HTMLParagraphElement>(null);
+  const isFontsReady = useFontsReady();
+
+  useGSAP(
+    () => {
+      if (!isFontsReady || isMotionDisabled()) return;
+
+      const splits = [splitLines(titleRef.current), splitWords(introRef.current)];
+      const [titleSplit, introSplit] = splits;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: START,
+          once: true,
+        },
+        onComplete: () => revertSplits(splits),
+      });
+
+      if (titleSplit) {
+        tl.from(titleSplit.lines, LINES_FROM, 0);
+      }
+
+      if (introSplit) {
+        tl.from(introSplit.words, WORDS_FROM, 0.3);
+      }
+
+      return () => revertSplits(splits);
+    },
+    { scope: rootRef, dependencies: [title, subtitle, isFontsReady] },
+  );
+
   return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="visible"
-      viewport={VIEWPORT_ONCE}
-      className={classNames(cls.block, {}, [className ?? ''])}
-    >
-      <h2 className={classNames(cls.title, { [cls.white]: isWhite }, [])}>
+    <div ref={rootRef} className={classNames(cls.block, {}, [className ?? ''])}>
+      <h2 ref={titleRef} className={classNames(cls.title, { [cls.white]: isWhite }, [])}>
         {title}
       </h2>
 
-      <p className={classNames(cls.intro, { [cls.white]: isWhite }, [])}>
+      <p ref={introRef} className={classNames(cls.intro, { [cls.white]: isWhite }, [])}>
         {subtitle}
       </p>
-    </motion.div>
+    </div>
   )
 };
 

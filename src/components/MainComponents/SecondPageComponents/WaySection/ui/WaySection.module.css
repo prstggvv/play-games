@@ -58,6 +58,10 @@
   filter: drop-shadow(0 0 6px rgba(201, 224, 74, 0.55));
 }
 
+.nodeGroup {
+  pointer-events: none;
+}
+
 .nodeRing {
   fill: none;
   stroke: var(--color-ball);

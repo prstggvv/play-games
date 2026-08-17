@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import cls from './PageLoader.module.css';
 import { classNames } from '../../../lib/classNames/classNames';
+import { gsap, useGSAP } from '../../../lib/gsap';
 import { useIsMobile } from '../../../lib/hooks/useIsMobile';
 
 interface IPageLoaderProps {
@@ -28,6 +28,7 @@ export const PageLoader = ({ onFinish, minDuration = 1700, className }: IPageLoa
   const [progress, setProgress] = useState(0);
   const reduced = useRef(prefersReducedMotion());
   const isMobile = useIsMobile();
+  const maskRef = useRef<SVGGElement>(null);
   useEffect(() => {
     let raf = 0;
     let current = 0;
@@ -72,6 +73,29 @@ export const PageLoader = ({ onFinish, minDuration = 1700, className }: IPageLoa
     }, wipeDuration);
     return () => window.clearTimeout(timer);
   }, [stage, onFinish, isMobile]);
+
+  useGSAP(
+    () => {
+      if (!maskRef.current) return;
+
+      if (stage !== 'wiping') {
+        gsap.set(maskRef.current.children, { drawSVG: '0%' });
+        return;
+      }
+
+      gsap.fromTo(
+        maskRef.current.children,
+        { drawSVG: '0%' },
+        {
+          drawSVG: '100%',
+          duration: reduced.current ? 0.5 : 0.95,
+          ease: 'power4.inOut',
+          stagger: 0.06,
+        },
+      );
+    },
+    { dependencies: [stage] },
+  );
 
   useEffect(() => {
     if (stage === 'done') return;
@@ -127,22 +151,16 @@ export const PageLoader = ({ onFinish, minDuration = 1700, className }: IPageLoa
           </filter>
           <mask id="pl-mask" maskUnits="userSpaceOnUse">
             <rect x="0" y="0" width="100" height="100" fill="#fff" />
-            <g filter="url(#pl-brush)">
-              {BRUSH_BANDS.map((y, i) => (
-                <motion.path
+            <g ref={maskRef} filter="url(#pl-brush)">
+              {BRUSH_BANDS.map((y) => (
+                <path
                   key={y}
                   d={`M -12 ${y} C 25 ${y - 4}, 55 ${y + 5}, 112 ${y - 2}`}
                   stroke="#000"
                   strokeWidth={20}
                   strokeLinecap="round"
                   fill="none"
-                  initial={{ pathLength: 0 }}
-                  animate={isWiping ? { pathLength: 1 } : { pathLength: 0 }}
-                  transition={{
-                    duration: reduced.current ? 0.5 : 0.95,
-                    ease: [0.76, 0, 0.24, 1],
-                    delay: isWiping ? i * 0.06 : 0,
-                  }}
+                  className={classNames(cls.band, {}, [])}
                 />
               ))}
             </g>

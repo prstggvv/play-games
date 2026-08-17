@@ -1,3 +1,7 @@
+.revealItem {
+  will-change: transform, opacity;
+}
+
 .footer {
   background: #0C120E;
   color: #F2EFE6;

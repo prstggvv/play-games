@@ -17,6 +17,10 @@
   display: block;
 }
 
+.band {
+  stroke-dasharray: 0px 3000px;
+}
+
 .content {
   position: relative;
   z-index: 1;

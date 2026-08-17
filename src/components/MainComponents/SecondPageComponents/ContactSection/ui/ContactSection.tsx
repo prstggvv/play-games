@@ -1,8 +1,12 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import cls from './ContactSection.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
-import { createStaggerContainer, itemReveal, VIEWPORT_ONCE } from '../../../../../shared/lib/motion';
+import {
+  gsap,
+  useGSAP,
+  isMotionDisabled,
+  revealFadeUp,
+} from '../../../../../shared/lib/gsap';
 import contactPhoto from '../../../../../shared/assets/images/secondPage/hero.jpg';
 
 interface IContactSection {
@@ -16,17 +20,38 @@ const PHONE_LABEL = '+7 000 000-00-00';
 const MAIL_LINK = 'mailto:club@yandex.ru';
 const MAIL_LABEL = 'club@yandex.ru';
 
-const container = createStaggerContainer(0.1);
-
 export const ContactSection = ({ className }: IContactSection) => {
   const sectionRef = useRef<HTMLElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  });
+  useGSAP(
+    () => {
+      revealFadeUp(`.${cls.revealItem}`, {
+        trigger: sectionRef.current,
+        y: 24,
+        duration: 0.6,
+        stagger: 0.1,
+      });
 
-  const bgY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%']);
+      if (isMotionDisabled()) return;
+
+      gsap.fromTo(
+        bgRef.current,
+        { yPercent: -8 },
+        {
+          yPercent: 8,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
+        },
+      );
+    },
+    { scope: sectionRef },
+  );
 
   return (
     <section
@@ -34,39 +59,33 @@ export const ContactSection = ({ className }: IContactSection) => {
       id="contact"
       className={classNames(cls.section, {}, [className ?? ''])}
     >
-      <motion.div className={classNames(cls.bg, {}, [])} style={{ y: bgY }}>
+      <div ref={bgRef} className={classNames(cls.bg, {}, [])}>
         <img
           className={classNames(cls.bgImg, {}, [])}
           src={contactPhoto}
           alt="Тренер и юная теннисистка на корте"
         />
-      </motion.div>
+      </div>
 
       <div className={classNames(cls.scrim, {}, [])} aria-hidden="true" />
 
-      <motion.div
-        className={classNames(cls.inner, {}, [])}
-        variants={container}
-        initial="hidden"
-        whileInView="visible"
-        viewport={VIEWPORT_ONCE}
-      >
-        <motion.div className={classNames(cls.kicker, {}, [])} variants={itemReveal}>
+      <div className={classNames(cls.inner, {}, [])}>
+        <div className={classNames(cls.kicker, {}, [cls.revealItem])}>
           <span className={classNames(cls.rule, {}, [])} />
           <span>Контакты</span>
-        </motion.div>
+        </div>
 
-        <motion.h2 className={classNames(cls.title, {}, [])} variants={itemReveal}>
+        <h2 className={classNames(cls.title, {}, [cls.revealItem])}>
           Давай
           <br />
           <span className={classNames(cls.accent, {}, [])}>знакомиться</span>
-        </motion.h2>
+        </h2>
 
-        <motion.p className={classNames(cls.sub, {}, [])} variants={itemReveal}>
+        <p className={classNames(cls.sub, {}, [cls.revealItem])}>
           Ответим на все вопросы и подберём удобное время для первой тренировки. Дети от 3 лет.
-        </motion.p>
+        </p>
 
-        <motion.div className={classNames(cls.socials, {}, [])} variants={itemReveal}>
+        <div className={classNames(cls.socials, {}, [cls.revealItem])}>
           <a
             className={classNames(cls.socLink, {}, [])}
             href={VK_LINK}
@@ -91,9 +110,9 @@ export const ContactSection = ({ className }: IContactSection) => {
               <path d="M21.9 4.6 18.6 19.8c-.25 1.07-.9 1.34-1.82.83l-5.03-3.71-2.43 2.34c-.27.27-.49.49-1.01.49l.36-5.12 9.32-8.42c.4-.36-.09-.56-.63-.2L5.84 13.2.9 11.66c-1.07-.34-1.09-1.07.22-1.59L20.5 2.7c.9-.33 1.68.2 1.4 1.9z" />
             </svg>
           </a>
-        </motion.div>
+        </div>
 
-        <motion.div className={classNames(cls.lines, {}, [])} variants={itemReveal}>
+        <div className={classNames(cls.lines, {}, [cls.revealItem])}>
           <a className={classNames(cls.line, {}, [])} href={PHONE_LINK} tabIndex={0} aria-label="Позвонить">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -107,8 +126,8 @@ export const ContactSection = ({ className }: IContactSection) => {
             </svg>
             {MAIL_LABEL}
           </a>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 };

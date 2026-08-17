@@ -1,13 +1,13 @@
-import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useRef, useState } from 'react';
 import cls from './Education.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
 import {
-  fadeUp,
-  itemReveal,
-  createStaggerContainer,
-  VIEWPORT_ONCE,
-} from '../../../../../shared/lib/motion';
+  gsap,
+  useGSAP,
+  isMotionDisabled,
+  revealFadeUp,
+  EASE_OUT,
+} from '../../../../../shared/lib/gsap';
 import sashaPhoto from '../../../../../shared/assets/images/secondPage/about/sasha.jpg';
 import ernestPhoto from '../../../../../shared/assets/images/secondPage/about/ernest.jpg';
 import TitleSecondPage from '../../../../../shared/ui/TitleSecondPage/TitleSecondPage';
@@ -168,14 +168,41 @@ const MetaIconSvg = ({ icon }: { icon: MetaIcon }) => {
   );
 };
 
-const cardStagger = createStaggerContainer(0.12);
-
 export const Education = ({ className }: IEducationProps) => {
+  const rootRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<HTMLUListElement>(null);
   const [activeId, setActiveId] = useState(TEACHERS[0].id);
 
   const activeTeacher = useMemo(
     () => TEACHERS.find((teacher) => teacher.id === activeId) ?? TEACHERS[0],
     [activeId],
+  );
+
+  useGSAP(
+    () => {
+      revealFadeUp(`.${cls.revealItem}`, {
+        trigger: rootRef.current,
+        y: 32,
+        duration: 0.7,
+        stagger: 0.12,
+      });
+    },
+    { scope: rootRef },
+  );
+
+  useGSAP(
+    () => {
+      if (isMotionDisabled()) return;
+
+      gsap.from(gridRef.current?.children ?? [], {
+        opacity: 0,
+        y: 24,
+        duration: 0.6,
+        stagger: 0.12,
+        ease: EASE_OUT,
+      });
+    },
+    { scope: gridRef, dependencies: [activeId] },
   );
 
   const handleSelect = (id: string) => () => {
@@ -189,7 +216,11 @@ export const Education = ({ className }: IEducationProps) => {
   };
 
   return (
-    <section id="education" className={classNames(cls.section, {}, [className ?? ''])}>
+    <section
+      ref={rootRef}
+      id="education"
+      className={classNames(cls.section, {}, [className ?? ''])}
+    >
       <div className={classNames(cls.container, {}, [])}>
         <TitleSecondPage
           title='Дипломы и квалификация'
@@ -197,14 +228,10 @@ export const Education = ({ className }: IEducationProps) => {
           isWhite={false}
         />
 
-        <motion.div
-          className={classNames(cls.tabs, {}, [])}
+        <div
+          className={classNames(cls.tabs, {}, [cls.revealItem])}
           role="tablist"
           aria-label="Выбор тренера"
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={VIEWPORT_ONCE}
         >
           {TEACHERS.map((teacher) => {
             const isActive = teacher.id === activeId;
@@ -231,36 +258,23 @@ export const Education = ({ className }: IEducationProps) => {
               </button>
             );
           })}
-        </motion.div>
+        </div>
 
-        <motion.div
-          className={classNames(cls.counter, {}, [])}
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={VIEWPORT_ONCE}
-        >
+        <div className={classNames(cls.counter, {}, [cls.revealItem])}>
           <span className={classNames(cls.num, {}, [])}>{activeTeacher.cards.length}</span>
           <span className={classNames(cls.lbl, {}, [])}>
             документов · {activeTeacher.name}
           </span>
-        </motion.div>
+        </div>
 
-        <motion.ul
-          key={activeTeacher.id}
-          className={classNames(cls.grid, {}, [])}
-          variants={cardStagger}
-          initial="hidden"
-          animate="visible"
-        >
+        <ul ref={gridRef} className={classNames(cls.grid, {}, [])}>
           {activeTeacher.cards.map((card) => (
-            <motion.li
+            <li
               key={card.title}
               className={classNames(cls.card, {
                 [cls.wide]: card.span === 'wide',
                 [cls.full]: card.span === 'full',
               }, [])}
-              variants={itemReveal}
             >
               <div className={classNames(cls.cardHead, {}, [])}>
                 <span className={classNames(cls.kind, {}, [])}>{card.kind}</span>
@@ -282,9 +296,9 @@ export const Education = ({ className }: IEducationProps) => {
                   </div>
                 ))}
               </div>
-            </motion.li>
+            </li>
           ))}
-        </motion.ul>
+        </ul>
       </div>
     </section>
   );

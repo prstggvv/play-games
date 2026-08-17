@@ -1,8 +1,7 @@
-import type { MouseEvent } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, type MouseEvent } from 'react';
 import cls from './Footer.module.css';
 import { classNames } from '../../../../shared/lib/classNames/classNames';
-import { createStaggerContainer, itemReveal, VIEWPORT_ONCE } from '../../../../shared/lib/motion';
+import { revealFadeUp, useGSAP } from '../../../../shared/lib/gsap';
 import { scrollToSection } from '../../../../shared/lib/scrollToSection/scrollToSection';
 import { FOOTER_COLUMNS } from '../model/footerNav';
 
@@ -20,24 +19,30 @@ const ABOUT_TEXT =
 
 const COPYRIGHT = '© 2026 Клуб «Пироговский»';
 
-const container = createStaggerContainer(0.12);
-
 export const Footer = ({ className }: IFooterProps) => {
+  const rootRef = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      revealFadeUp(`.${cls.revealItem}`, {
+        trigger: rootRef.current,
+        y: 24,
+        duration: 0.6,
+        stagger: 0.12,
+      });
+    },
+    { scope: rootRef },
+  );
+
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     event.preventDefault();
     scrollToSection(sectionId);
   };
 
   return (
-    <footer className={classNames(cls.footer, {}, [className ?? ''])}>
-      <motion.div
-        className={classNames(cls.inner, {}, [])}
-        variants={container}
-        initial="hidden"
-        whileInView="visible"
-        viewport={VIEWPORT_ONCE}
-      >
-        <motion.div className={classNames(cls.about, {}, [])} variants={itemReveal}>
+    <footer ref={rootRef} className={classNames(cls.footer, {}, [className ?? ''])}>
+      <div className={classNames(cls.inner, {}, [])}>
+        <div className={classNames(cls.about, {}, [cls.revealItem])}>
           <p className={classNames(cls.aboutText, {}, [])}>{ABOUT_TEXT}</p>
 
           <div className={classNames(cls.socials, {}, [])}>
@@ -68,14 +73,13 @@ export const Footer = ({ className }: IFooterProps) => {
               {TG_LABEL}
             </a>
           </div>
-        </motion.div>
+        </div>
 
         {FOOTER_COLUMNS.map((column) => (
-          <motion.nav
+          <nav
             key={column.title}
-            className={classNames(cls.col, {}, [])}
+            className={classNames(cls.col, {}, [cls.revealItem])}
             aria-label={column.ariaLabel}
-            variants={itemReveal}
           >
             <h4 className={classNames(cls.colTitle, {}, [])}>{column.title}</h4>
             <ul className={classNames(cls.colList, {}, [])}>
@@ -92,9 +96,9 @@ export const Footer = ({ className }: IFooterProps) => {
                 </li>
               ))}
             </ul>
-          </motion.nav>
+          </nav>
         ))}
-      </motion.div>
+      </div>
 
       <div className={classNames(cls.legal, {}, [])}>
         <div className={classNames(cls.legalRow, {}, [])}>

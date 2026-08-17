@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import cls from './HeroSecondSection.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
+import { gsap, useGSAP, isMotionDisabled, EASE_OUT } from '../../../../../shared/lib/gsap';
 import heroPhoto from '../../../../../shared/assets/images/secondPage/hero.jpg';
 
 interface IHeroSecondSectionProps {
@@ -11,15 +12,34 @@ const VK_LINK = 'https://vk.com/ibolvan123';
 const TG_LINK = 'https://t.me/';
 const MAIL_LINK = 'mailto:club@yandex.ru';
 
-const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 22 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.7, ease: 'easeOut' as const, delay },
-});
-
 export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
+  const rootRef = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      if (isMotionDisabled()) return;
+
+      gsap.from(`.${cls.reveal}`, {
+        opacity: 0,
+        y: 22,
+        duration: 0.7,
+        delay: 0.1,
+        stagger: 0.06,
+        ease: EASE_OUT,
+      });
+
+      gsap.from(`.${cls.photoImg}`, {
+        scale: 1.12,
+        duration: 1.6,
+        ease: EASE_OUT,
+      });
+    },
+    { scope: rootRef },
+  );
+
   return (
     <section
+      ref={rootRef}
       id="hero"
       className={classNames(cls.hero, {}, [className ?? ''])}
     >
@@ -33,71 +53,67 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
         </div>
 
         <div className={classNames(cls.tab, {}, [cls.tabTl])}>
-          <motion.div className={classNames(cls.logo, {}, [])} {...fadeUp(0.1)}>
+          <div className={classNames(cls.logo, {}, [cls.reveal])}>
             <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
               <circle cx="13" cy="13" r="11" stroke="currentColor" strokeWidth="1.5" />
               <path d="M4.5 6.5c4 3 4 10 0 13M21.5 6.5c-4 3-4 10 0 13" stroke="currentColor" strokeWidth="1.5" />
             </svg>
             <span className={classNames(cls.logoMark, {}, [])}>АЭ</span>
-          </motion.div>
+          </div>
         </div>
 
         <nav className={classNames(cls.tab, {}, [cls.tabTr])} aria-label="Навигация">
-          <motion.a
-            className={classNames(cls.pill, {}, [])}
+          <a
+            className={classNames(cls.pill, {}, [cls.reveal])}
             href="#about"
             tabIndex={0}
             aria-label="О нас"
-            {...fadeUp(0.16)}
           >
             О нас
-          </motion.a>
-          <motion.a
-            className={classNames(cls.pill, {}, [])}
+          </a>
+          <a
+            className={classNames(cls.pill, {}, [cls.reveal])}
             href="#about"
             tabIndex={0}
             aria-label="Тренеры"
-            {...fadeUp(0.22)}
           >
             Тренеры
-          </motion.a>
-          <motion.a
-            className={classNames(cls.pill, {}, [])}
+          </a>
+          <a
+            className={classNames(cls.pill, {}, [cls.reveal])}
             href="#contact"
             tabIndex={0}
             aria-label="Контакты"
-            {...fadeUp(0.28)}
           >
             Контакты
-          </motion.a>
+          </a>
         </nav>
 
-        <motion.a
-          className={classNames(cls.cta, {}, [])}
+        <a
+          className={classNames(cls.cta, {}, [cls.reveal])}
           href="#contact"
           tabIndex={0}
           aria-label="Записаться на тренировку"
-          {...fadeUp(0.34)}
         >
           Записаться
-        </motion.a>
+        </a>
 
         <div className={classNames(cls.text, {}, [])}>
-          <motion.h1 className={classNames(cls.title, {}, [])} {...fadeUp(0.4)}>
+          <h1 className={classNames(cls.title, {}, [cls.reveal])}>
             <span className={classNames(cls.titleL1, {}, [])}>Большой теннис</span>
             <span className={classNames(cls.titleL2, {}, [])}>для маленьких</span>
-          </motion.h1>
-          <motion.p className={classNames(cls.sub, {}, [])} {...fadeUp(0.46)}>
+          </h1>
+          <p className={classNames(cls.sub, {}, [cls.reveal])}>
             Детский теннисный клуб. Внимание, терпение и игра — в каждой тренировке.
-          </motion.p>
+          </p>
         </div>
 
-        <motion.p className={classNames(cls.tagText, {}, [])} {...fadeUp(0.52)}>
+        <p className={classNames(cls.tagText, {}, [cls.reveal])}>
           Клуб «Пироговский» — записывайтесь на первую тренировку.
-        </motion.p>
+        </p>
 
         <div className={classNames(cls.tab, {}, [cls.tabBr])}>
-          <motion.div className={classNames(cls.soc, {}, [])} {...fadeUp(0.58)}>
+          <div className={classNames(cls.soc, {}, [cls.reveal])}>
             <a
               className={classNames(cls.socLink, {}, [])}
               href={VK_LINK}
@@ -133,7 +149,7 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
                 <path d="M4 7l8 5.5L20 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
             </a>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
