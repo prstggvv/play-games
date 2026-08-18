@@ -6,7 +6,13 @@ import {
   useGSAP,
   isMotionDisabled,
   revealFadeUp,
+  scrollOnce,
+  wipeFrom,
+  WIPE_TO,
+  START,
   EASE_OUT,
+  EASE_SOFT,
+  EASE_EXPO,
 } from '../../../../../shared/lib/gsap';
 import sashaPhoto from '../../../../../shared/assets/images/secondPage/about/sasha.jpg';
 import ernestPhoto from '../../../../../shared/assets/images/secondPage/about/ernest.jpg';
@@ -133,6 +139,14 @@ const TEACHERS: ITeacher[] = [
   },
 ];
 
+const WAVE_SPREAD = 0.5;
+const DRAW_DURATION = 0.5;
+const FILL_AT = 0.26;
+const FILL_DURATION = 0.45;
+const LINES_AT = 0.42;
+const LINE_HIDDEN = 'inset(-12% 100% -12% 0%)';
+const LINE_SHOWN = 'inset(-12% -3% -12% 0%)';
+
 const MetaIconSvg = ({ icon }: { icon: MetaIcon }) => {
   if (icon === 'org') {
     return (
@@ -192,14 +206,64 @@ export const Education = ({ className }: IEducationProps) => {
 
   useGSAP(
     () => {
-      if (isMotionDisabled()) return;
+      const grid = gridRef.current;
+      if (!grid || isMotionDisabled()) return;
 
-      gsap.from(gridRef.current?.children ?? [], {
-        opacity: 0,
-        y: 24,
-        duration: 0.6,
-        stagger: 0.12,
-        ease: EASE_OUT,
+      const cards = gsap.utils.toArray<HTMLElement>(`.${cls.card}`, grid);
+      if (!cards.length) return;
+
+      const gridRect = grid.getBoundingClientRect();
+      const gridWidth = Math.max(gridRect.width, 1);
+      const gridHeight = Math.max(gridRect.height, 1);
+
+      const offsets = cards.map((card) => {
+        const rect = card.getBoundingClientRect();
+        const x = (rect.left - gridRect.left) / gridWidth;
+        const y = (rect.top - gridRect.top) / gridHeight;
+
+        return x + y;
+      });
+
+      const maxOffset = Math.max(...offsets, 0.001);
+      const timeline = gsap.timeline({ scrollTrigger: scrollOnce(grid, START) });
+
+      cards.forEach((card, index) => {
+        const frame = card.querySelector<SVGRectElement>(`.${cls.frameRect}`);
+        const surface = card.querySelector<HTMLElement>(`.${cls.surface}`);
+        const lines = gsap.utils.toArray<HTMLElement>(`.${cls.line}`, card);
+        const at = (offsets[index] / maxOffset) * WAVE_SPREAD;
+
+        gsap.set(frame, { drawSVG: '0% 0%', opacity: 0 });
+        gsap.set(surface, { clipPath: wipeFrom(false) });
+        gsap.set(lines, { clipPath: LINE_HIDDEN });
+
+        timeline
+          .set(frame, { opacity: 1 }, at)
+          .to(
+            frame,
+            { drawSVG: '0% 100%', duration: DRAW_DURATION, ease: 'power2.inOut' },
+            at,
+          )
+          .to(
+            surface,
+            { clipPath: WIPE_TO, duration: FILL_DURATION, ease: EASE_EXPO },
+            at + FILL_AT,
+          )
+          .to(
+            frame,
+            { opacity: 0, duration: 0.4, ease: EASE_SOFT },
+            at + DRAW_DURATION,
+          )
+          .to(
+            lines,
+            {
+              clipPath: LINE_SHOWN,
+              duration: 0.4,
+              stagger: 0.05,
+              ease: EASE_OUT,
+            },
+            at + LINES_AT,
+          );
       });
     },
     { scope: gridRef, dependencies: [activeId] },
@@ -276,20 +340,26 @@ export const Education = ({ className }: IEducationProps) => {
                 [cls.full]: card.span === 'full',
               }, [])}
             >
-              <div className={classNames(cls.cardHead, {}, [])}>
+              <svg className={classNames(cls.frame, {}, [])} aria-hidden="true" focusable="false">
+                <rect className={classNames(cls.frameRect, {}, [])} x="0" y="0" width="100%" height="100%" />
+              </svg>
+
+              <span className={classNames(cls.surface, {}, [])} aria-hidden="true" />
+
+              <div className={classNames(cls.cardHead, {}, [cls.line])}>
                 <span className={classNames(cls.kind, {}, [])}>{card.kind}</span>
                 {!card.noYear ? (
                   <span className={classNames(cls.year, {}, [])}>{card.year}</span>
                 ) : null}
               </div>
 
-              <h3 className={classNames(cls.cardTitle, {}, [])}>{card.title}</h3>
+              <h3 className={classNames(cls.cardTitle, {}, [cls.line])}>{card.title}</h3>
 
               <div className={classNames(cls.meta, {}, [])}>
                 {card.meta.map((row) => (
                   <div
                     key={row.text}
-                    className={classNames(cls.row, { [cls.code]: !!row.code }, [])}
+                    className={classNames(cls.row, { [cls.code]: !!row.code }, [cls.line])}
                   >
                     {row.icon ? <MetaIconSvg icon={row.icon} /> : null}
                     {row.text}
