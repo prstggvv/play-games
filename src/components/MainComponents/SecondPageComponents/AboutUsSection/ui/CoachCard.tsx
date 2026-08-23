@@ -124,7 +124,11 @@ export const CoachCard = ({ coach }: ICoachCardProps) => {
       </div>
 
       <div ref={photoRef} className={classNames(cls.tcPhoto, {}, [])}>
-        <img ref={imgRef} src={coach.photo} alt={coach.alt} />
+        <img
+          className={classNames(cls.tcPhotoImg, {}, [])}
+          ref={imgRef}
+          src={coach.photo}
+          alt={coach.alt} />
       </div>
 
       <div

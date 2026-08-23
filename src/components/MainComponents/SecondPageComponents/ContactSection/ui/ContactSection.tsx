@@ -7,7 +7,7 @@ import {
   isMotionDisabled,
   revealFadeUp,
 } from '../../../../../shared/lib/gsap';
-import contactPhoto from '../../../../../shared/assets/images/secondPage/hero.jpg';
+import contactPhoto from '../../../../../shared/assets/images/contact_main.jpg';
 
 interface IContactSection {
   className?: string;
@@ -70,11 +70,6 @@ export const ContactSection = ({ className }: IContactSection) => {
       <div className={classNames(cls.scrim, {}, [])} aria-hidden="true" />
 
       <div className={classNames(cls.inner, {}, [])}>
-        <div className={classNames(cls.kicker, {}, [cls.revealItem])}>
-          <span className={classNames(cls.rule, {}, [])} />
-          <span>Контакты</span>
-        </div>
-
         <h2 className={classNames(cls.title, {}, [cls.revealItem])}>
           Давай
           <br />
