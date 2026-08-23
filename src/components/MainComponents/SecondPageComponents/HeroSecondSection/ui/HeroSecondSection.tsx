@@ -3,14 +3,15 @@ import cls from './HeroSecondSection.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
 import { gsap, useGSAP, isMotionDisabled, EASE_OUT } from '../../../../../shared/lib/gsap';
 import heroPhoto from '../../../../../shared/assets/images/secondPage/hero.jpg';
+import {
+  VK_LINK,
+  TG_LINK,
+  MAIL_LINK,
+} from '../../../../../shared/lib/constants/index';
 
 interface IHeroSecondSectionProps {
   className?: string;
 }
-
-const VK_LINK = 'https://vk.com/ibolvan123';
-const TG_LINK = 'https://t.me/';
-const MAIL_LINK = 'mailto:club@yandex.ru';
 
 export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
   const rootRef = useRef<HTMLElement>(null);

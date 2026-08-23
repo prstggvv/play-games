@@ -3,13 +3,14 @@ import cls from './UnderFooter.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
 import { gsap, useGSAP, isMotionDisabled } from '../../../../../shared/lib/gsap';
 import revealPhoto from '../../../../../shared/assets/images/contact.jpg';
+import {
+  TITLE,
+  PHOTO_ALT,
+} from '../model/underFooterConst';
 
 interface IUnderFooter {
   className?: string;
 }
-
-const TITLE = 'Пироговский';
-const PHOTO_ALT = 'Теннисный клуб «Пироговский»';
 
 export const UnderFooter = ({ className }: IUnderFooter) => {
   const spacerRef = useRef<HTMLDivElement>(null);

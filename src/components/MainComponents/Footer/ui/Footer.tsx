@@ -5,13 +5,16 @@ import { revealFadeUp, useGSAP } from '../../../../shared/lib/gsap';
 import { scrollToSection } from '../../../../shared/lib/scrollToSection/scrollToSection';
 import { FOOTER_COLUMNS } from '../model/footerNav';
 import {
+  ABOUT_TEXT,
+  COPYRIGHT,
+} from '../model/footerNav';
+import {
   VK_LINK,
   VK_LABEL,
   TG_LINK,
   TG_LABEL,
-  ABOUT_TEXT,
-  COPYRIGHT,
-} from '../model/footerNav';
+} from '../../../../shared/lib/constants/index';
+
 
 interface IFooterProps {
   className?: string;

@@ -8,17 +8,18 @@ import {
   revealFadeUp,
 } from '../../../../../shared/lib/gsap';
 import contactPhoto from '../../../../../shared/assets/images/contact_main.jpg';
+import {
+  VK_LINK,
+  TG_LINK,
+  PHONE_LINK,
+  PHONE_LABEL,
+  MAIL_LINK,
+  MAIL_LABEL,
+} from '../../../../../shared/lib/constants/index';
 
 interface IContactSection {
   className?: string;
 }
-
-const VK_LINK = 'https://vk.com/ibolvan123';
-const TG_LINK = 'https://t.me/';
-const PHONE_LINK = 'tel:+70000000000';
-const PHONE_LABEL = '+7 000 000-00-00';
-const MAIL_LINK = 'mailto:club@yandex.ru';
-const MAIL_LABEL = 'club@yandex.ru';
 
 export const ContactSection = ({ className }: IContactSection) => {
   const sectionRef = useRef<HTMLElement>(null);
