@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "npm run build && scp -r ./dist/* ivan1@88.218.66.247:/home/ivan1/applications/psyho"
+    "deploy": "npm run build && scp -r ./dist/* ivan1@88.218.66.247:/home/ivan1/applications/tennis"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
