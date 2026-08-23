@@ -4,20 +4,18 @@ import { classNames } from '../../../../shared/lib/classNames/classNames';
 import { revealFadeUp, useGSAP } from '../../../../shared/lib/gsap';
 import { scrollToSection } from '../../../../shared/lib/scrollToSection/scrollToSection';
 import { FOOTER_COLUMNS } from '../model/footerNav';
+import {
+  VK_LINK,
+  VK_LABEL,
+  TG_LINK,
+  TG_LABEL,
+  ABOUT_TEXT,
+  COPYRIGHT,
+} from '../model/footerNav';
 
 interface IFooterProps {
   className?: string;
 }
-
-const VK_LINK = 'https://vk.com/ibolvan123';
-const VK_LABEL = 'vk.com/ibolvan123';
-const TG_LINK = 'https://t.me/';
-const TG_LABEL = 'Telegram';
-
-const ABOUT_TEXT =
-  'Детский теннисный клуб «Пироговский». Учим детей любить теннис — спокойно, по делу и с вниманием к каждому ребёнку. От первого касания ракетки до уверенной подачи.';
-
-const COPYRIGHT = '© 2026 Клуб «Пироговский»';
 
 export const Footer = ({ className }: IFooterProps) => {
   const rootRef = useRef<HTMLElement>(null);

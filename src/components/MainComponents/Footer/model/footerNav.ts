@@ -9,6 +9,17 @@ export interface IFooterColumn {
   links: IFooterLink[];
 }
 
+export const VK_LINK = 'https://vk.ru/id138932826';
+export const VK_LABEL = 'VK';
+export const TG_LINK = 'https://t.me/tennis1coachmoscow';
+export const TG_LABEL = 'Telegram';
+
+export const ABOUT_TEXT =
+  'Детский теннисный клуб «Пироговский». Учим детей любить теннис — спокойно, по делу и с вниманием к каждому ребёнку. От первого касания ракетки до уверенной подачи.';
+
+export const COPYRIGHT = '© 2026 Клуб «Пироговский»';
+
+
 export const FOOTER_COLUMNS: IFooterColumn[] = [
   {
     title: 'Разделы',
