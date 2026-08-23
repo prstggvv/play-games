@@ -4,6 +4,8 @@
   padding: 120px 0 110px;
   background: var(--color-green-deep);
   color: #F4F7F2;
+  border-top-left-radius: 44px;
+  border-top-right-radius: 44px;
 }
 
 .container {
@@ -56,6 +58,10 @@
   stroke-width: 6;
   stroke-linecap: round;
   filter: drop-shadow(0 0 6px rgba(201, 224, 74, 0.55));
+}
+
+.nodeGroup {
+  pointer-events: none;
 }
 
 .nodeRing {

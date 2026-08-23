@@ -1,137 +1,35 @@
-import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useRef, useState } from 'react';
 import cls from './Education.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
 import {
-  fadeUp,
-  itemReveal,
-  createStaggerContainer,
-  VIEWPORT_ONCE,
-} from '../../../../../shared/lib/motion';
-import sashaPhoto from '../../../../../shared/assets/images/secondPage/about/sasha.jpg';
-import ernestPhoto from '../../../../../shared/assets/images/secondPage/about/ernest.jpg';
+  gsap,
+  useGSAP,
+  isMotionDisabled,
+  revealFadeUp,
+  scrollOnce,
+  wipeFrom,
+  WIPE_TO,
+  START,
+  EASE_OUT,
+  EASE_SOFT,
+  EASE_EXPO,
+} from '../../../../../shared/lib/gsap';
 import TitleSecondPage from '../../../../../shared/ui/TitleSecondPage/TitleSecondPage';
+import {
+  TEACHERS,
+  WAVE_SPREAD,
+  DRAW_DURATION,
+  FILL_AT,
+  FILL_DURATION,
+  LINES_AT,
+  LINE_HIDDEN,
+  LINE_SHOWN,
+  type MetaIcon,
+} from '../model/educationConsts';
 
 interface IEducationProps {
   className?: string;
 }
-
-type MetaIcon = 'org' | 'fed' | 'date' | 'psych';
-
-interface IMetaRow {
-  icon?: MetaIcon;
-  code?: boolean;
-  text: string;
-}
-
-type CardSpan = 'wide' | 'full';
-
-interface IEduCard {
-  year: string;
-  noYear?: boolean;
-  kind: string;
-  title: string;
-  span?: CardSpan;
-  meta: IMetaRow[];
-}
-
-interface ITeacher {
-  id: string;
-  kicker: string;
-  name: string;
-  avatar: string;
-  cards: IEduCard[];
-}
-
-const TEACHERS: ITeacher[] = [
-  {
-    id: 'a',
-    kicker: 'Тренер',
-    name: 'Александра',
-    avatar: sashaPhoto,
-    cards: [
-      {
-        year: '2021',
-        kind: 'Бакалавриат',
-        title: 'Физическая культура',
-        span: 'wide',
-        meta: [
-          { code: true, text: '49.03.01' },
-          { icon: 'org', text: 'ПГУФКСиТ' },
-          { icon: 'date', text: '7 июля 2021' },
-        ],
-      },
-      {
-        year: '2022',
-        kind: 'Курс RTF',
-        title: 'Entry Level Coaches Course: Play Tennis & Tennis 10’s',
-        meta: [
-          { icon: 'fed', text: 'Федерация тенниса России' },
-          { icon: 'date', text: '30 мая 2022' },
-        ],
-      },
-      {
-        year: '—',
-        noYear: true,
-        kind: 'Квалификация',
-        title: 'RTF Level 1 — слушатель',
-        meta: [{ icon: 'fed', text: 'Федерация тенниса России' }],
-      },
-      {
-        year: '—',
-        noYear: true,
-        kind: 'Магистратура',
-        title: 'Спорт',
-        span: 'wide',
-        meta: [
-          { code: true, text: '49.04.03' },
-          { icon: 'org', text: 'ПГУФКСиТ' },
-        ],
-      },
-      {
-        year: '2025',
-        kind: 'Переподготовка',
-        title: 'Психолог-консультант',
-        span: 'full',
-        meta: [
-          { icon: 'psych', text: 'Спортивная психология' },
-          { icon: 'date', text: '20 февраля 2025' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'e',
-    kicker: 'Тренер',
-    name: 'Эрнест',
-    avatar: ernestPhoto,
-    cards: [
-      {
-        year: '2009',
-        kind: 'Высшее',
-        title: 'Высшее образование',
-        span: 'wide',
-        meta: [{ icon: 'org', text: 'РГУФКСиТ' }],
-      },
-      {
-        year: '2022',
-        kind: 'Курс RTF',
-        title: 'Entry Level Coaches Course: Play Tennis & Tennis 10s',
-        meta: [{ icon: 'fed', text: 'Федерация тенниса России' }],
-      },
-      {
-        year: '2023',
-        kind: 'Курс RTF',
-        title: 'Level 1 Coaches Course: Coaching Beginner and Intermediate Players',
-        span: 'full',
-        meta: [
-          { icon: 'fed', text: 'Федерация тенниса России' },
-          { icon: 'date', text: '1 мая 2023' },
-        ],
-      },
-    ],
-  },
-];
 
 const MetaIconSvg = ({ icon }: { icon: MetaIcon }) => {
   if (icon === 'org') {
@@ -168,14 +66,91 @@ const MetaIconSvg = ({ icon }: { icon: MetaIcon }) => {
   );
 };
 
-const cardStagger = createStaggerContainer(0.12);
-
 export const Education = ({ className }: IEducationProps) => {
+  const rootRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<HTMLUListElement>(null);
   const [activeId, setActiveId] = useState(TEACHERS[0].id);
 
   const activeTeacher = useMemo(
     () => TEACHERS.find((teacher) => teacher.id === activeId) ?? TEACHERS[0],
     [activeId],
+  );
+
+  useGSAP(
+    () => {
+      revealFadeUp(`.${cls.revealItem}`, {
+        trigger: rootRef.current,
+        y: 32,
+        duration: 0.7,
+        stagger: 0.12,
+      });
+    },
+    { scope: rootRef },
+  );
+
+  useGSAP(
+    () => {
+      const grid = gridRef.current;
+      if (!grid || isMotionDisabled()) return;
+
+      const cards = gsap.utils.toArray<HTMLElement>(`.${cls.card}`, grid);
+      if (!cards.length) return;
+
+      const gridRect = grid.getBoundingClientRect();
+      const gridWidth = Math.max(gridRect.width, 1);
+      const gridHeight = Math.max(gridRect.height, 1);
+
+      const offsets = cards.map((card) => {
+        const rect = card.getBoundingClientRect();
+        const x = (rect.left - gridRect.left) / gridWidth;
+        const y = (rect.top - gridRect.top) / gridHeight;
+
+        return x + y;
+      });
+
+      const maxOffset = Math.max(...offsets, 0.001);
+      const timeline = gsap.timeline({ scrollTrigger: scrollOnce(grid, START) });
+
+      cards.forEach((card, index) => {
+        const frame = card.querySelector<SVGRectElement>(`.${cls.frameRect}`);
+        const surface = card.querySelector<HTMLElement>(`.${cls.surface}`);
+        const lines = gsap.utils.toArray<HTMLElement>(`.${cls.line}`, card);
+        const at = (offsets[index] / maxOffset) * WAVE_SPREAD;
+
+        gsap.set(frame, { drawSVG: '0% 0%', opacity: 0 });
+        gsap.set(surface, { clipPath: wipeFrom(false) });
+        gsap.set(lines, { clipPath: LINE_HIDDEN });
+
+        timeline
+          .set(frame, { opacity: 1 }, at)
+          .to(
+            frame,
+            { drawSVG: '0% 100%', duration: DRAW_DURATION, ease: 'power2.inOut' },
+            at,
+          )
+          .to(
+            surface,
+            { clipPath: WIPE_TO, duration: FILL_DURATION, ease: EASE_EXPO },
+            at + FILL_AT,
+          )
+          .to(
+            frame,
+            { opacity: 0, duration: 0.4, ease: EASE_SOFT },
+            at + DRAW_DURATION,
+          )
+          .to(
+            lines,
+            {
+              clipPath: LINE_SHOWN,
+              duration: 0.4,
+              stagger: 0.05,
+              ease: EASE_OUT,
+            },
+            at + LINES_AT,
+          );
+      });
+    },
+    { scope: gridRef, dependencies: [activeId] },
   );
 
   const handleSelect = (id: string) => () => {
@@ -189,7 +164,11 @@ export const Education = ({ className }: IEducationProps) => {
   };
 
   return (
-    <section className={classNames(cls.section, {}, [className ?? ''])}>
+    <section
+      ref={rootRef}
+      id="education"
+      className={classNames(cls.section, {}, [className ?? ''])}
+    >
       <div className={classNames(cls.container, {}, [])}>
         <TitleSecondPage
           title='Дипломы и квалификация'
@@ -197,14 +176,10 @@ export const Education = ({ className }: IEducationProps) => {
           isWhite={false}
         />
 
-        <motion.div
-          className={classNames(cls.tabs, {}, [])}
+        <div
+          className={classNames(cls.tabs, {}, [cls.revealItem])}
           role="tablist"
           aria-label="Выбор тренера"
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={VIEWPORT_ONCE}
         >
           {TEACHERS.map((teacher) => {
             const isActive = teacher.id === activeId;
@@ -231,60 +206,53 @@ export const Education = ({ className }: IEducationProps) => {
               </button>
             );
           })}
-        </motion.div>
+        </div>
 
-        <motion.div
-          className={classNames(cls.counter, {}, [])}
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={VIEWPORT_ONCE}
-        >
+        <div className={classNames(cls.counter, {}, [cls.revealItem])}>
           <span className={classNames(cls.num, {}, [])}>{activeTeacher.cards.length}</span>
           <span className={classNames(cls.lbl, {}, [])}>
             документов · {activeTeacher.name}
           </span>
-        </motion.div>
+        </div>
 
-        <motion.ul
-          key={activeTeacher.id}
-          className={classNames(cls.grid, {}, [])}
-          variants={cardStagger}
-          initial="hidden"
-          animate="visible"
-        >
+        <ul ref={gridRef} className={classNames(cls.grid, {}, [])}>
           {activeTeacher.cards.map((card) => (
-            <motion.li
+            <li
               key={card.title}
               className={classNames(cls.card, {
                 [cls.wide]: card.span === 'wide',
                 [cls.full]: card.span === 'full',
               }, [])}
-              variants={itemReveal}
             >
-              <div className={classNames(cls.cardHead, {}, [])}>
+              <svg className={classNames(cls.frame, {}, [])} aria-hidden="true" focusable="false">
+                <rect className={classNames(cls.frameRect, {}, [])} x="0" y="0" width="100%" height="100%" />
+              </svg>
+
+              <span className={classNames(cls.surface, {}, [])} aria-hidden="true" />
+
+              <div className={classNames(cls.cardHead, {}, [cls.line])}>
                 <span className={classNames(cls.kind, {}, [])}>{card.kind}</span>
                 {!card.noYear ? (
                   <span className={classNames(cls.year, {}, [])}>{card.year}</span>
                 ) : null}
               </div>
 
-              <h3 className={classNames(cls.cardTitle, {}, [])}>{card.title}</h3>
+              <h3 className={classNames(cls.cardTitle, {}, [cls.line])}>{card.title}</h3>
 
               <div className={classNames(cls.meta, {}, [])}>
                 {card.meta.map((row) => (
                   <div
                     key={row.text}
-                    className={classNames(cls.row, { [cls.code]: !!row.code }, [])}
+                    className={classNames(cls.row, { [cls.code]: !!row.code }, [cls.line])}
                   >
                     {row.icon ? <MetaIconSvg icon={row.icon} /> : null}
                     {row.text}
                   </div>
                 ))}
               </div>
-            </motion.li>
+            </li>
           ))}
-        </motion.ul>
+        </ul>
       </div>
     </section>
   );

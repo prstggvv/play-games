@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ReactLenis, type LenisRef } from 'lenis/react';
-import { MotionGlobalConfig } from 'framer-motion';
 import AppRouter from '../components/AppRouter/AppRouter';
 import { classNames } from '../shared/lib/classNames/classNames';
+import { ScrollTrigger } from '../shared/lib/gsap';
 import { setLenis } from '../shared/lib/scrollToSection/scrollToSection';
 import { useIsMobile } from '../shared/lib/hooks/useIsMobile';
 import { PageLoader } from '../shared/ui/PageLoader';
@@ -13,18 +13,35 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
 
-  // On mobile: no framer entrance/appearance animations at all.
-  MotionGlobalConfig.skipAnimations = isMobile;
-
   useEffect(() => {
     if (isMobile) {
-      // Native scrolling on mobile — no Lenis smoothing ("тягучесть").
       setLenis(null);
       return;
     }
-    setLenis(lenisRef.current?.lenis ?? null);
-    return () => setLenis(null);
+
+    const lenis = lenisRef.current?.lenis ?? null;
+    setLenis(lenis);
+
+    if (!lenis) {
+      return () => setLenis(null);
+    }
+
+    const handleLenisScroll = () => ScrollTrigger.update();
+    lenis.on('scroll', handleLenisScroll);
+    ScrollTrigger.refresh();
+
+    return () => {
+      lenis.off('scroll', handleLenisScroll);
+      setLenis(null);
+    };
   }, [isMobile]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+
+    return () => cancelAnimationFrame(raf);
+  }, [isLoading]);
 
   const content = (
     <>

@@ -4,7 +4,9 @@ import { HeroSecondSection } from '../../../components/MainComponents/SecondPage
 import { AboutUsSection } from '../../../components/MainComponents/SecondPageComponents/AboutUsSection';
 import { WaySection } from '../../../components/MainComponents/SecondPageComponents/WaySection';
 import { Education } from '../../../components/MainComponents/SecondPageComponents/Education';
-import { Footer } from '../../../components/Footer';
+import { Footer } from '../../../components/MainComponents/Footer';
+import { ContactSection } from '../../../components/MainComponents/SecondPageComponents/ContactSection';
+import { UnderFooter } from '../../../components/MainComponents/SecondPageComponents/UnderFooter';
 
 interface ISecondMainPageAsync {
   className?: string;
@@ -12,13 +14,18 @@ interface ISecondMainPageAsync {
 
 const MainPage = ({ className }: ISecondMainPageAsync) => {
   return (
-    <main className={classNames(cls.content, {}, [className ?? ''])}>
-      <HeroSecondSection />
-      <AboutUsSection />
-      <WaySection />
-      <Education />
-      <Footer />
-    </main>
+    <>
+      <main className={classNames(cls.content, {}, [className ?? ''])}>
+        <HeroSecondSection />
+        <AboutUsSection />
+        <WaySection />
+        <Education />
+        <ContactSection />
+        <Footer />
+      </main>
+
+      <UnderFooter />
+    </>
   )
 };
 
