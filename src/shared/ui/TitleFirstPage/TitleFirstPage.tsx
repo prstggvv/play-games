@@ -1,7 +1,7 @@
-import { motion, type Variants } from 'framer-motion';
+import { useRef } from 'react';
 import cls from './TitleFirstPage.module.css';
 import { classNames } from '../../lib/classNames/classNames';
-import { MOTION_EASE, VIEWPORT_ONCE } from '../../lib/motion';
+import { gsap, useGSAP, isMotionDisabled, EASE_EXPO, START } from '../../lib/gsap';
 
 interface ITitleFirstPageProps {
   className?: string;
@@ -9,65 +9,54 @@ interface ITitleFirstPageProps {
   subtitle: string;
 }
 
-const containerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.18,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const lineVariants: Variants = {
-  hidden: { scaleX: 0 },
-  visible: {
-    scaleX: 1,
-    transition: { duration: 0.95, ease: MOTION_EASE },
-  },
-};
-
-const textVariants: Variants = {
-  hidden: { opacity: 0, y: 14, clipPath: 'inset(0 100% 0 0)' },
-  visible: {
-    opacity: 1,
-    y: 0,
-    clipPath: 'inset(0 0% 0 0)',
-    transition: { duration: 0.85, ease: MOTION_EASE },
-  },
-};
-
 const TitleFirstPage = ({
   className,
   title,
   subtitle,
 }: ITitleFirstPageProps) => {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const kickerRef = useRef<HTMLHeadingElement>(null);
+  const rangeRef = useRef<HTMLSpanElement>(null);
+  const lineRef = useRef<HTMLSpanElement>(null);
+
+  useGSAP(
+    () => {
+      if (isMotionDisabled()) return;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: START,
+          once: true,
+        },
+        defaults: { ease: EASE_EXPO },
+      });
+
+      tl.from([kickerRef.current, rangeRef.current], {
+        opacity: 0,
+        y: 14,
+        clipPath: 'inset(0% 100% 0% 0%)',
+        duration: 0.85,
+        stagger: 0.18,
+      }).from(
+        lineRef.current,
+        { scaleX: 0, transformOrigin: 'left center', duration: 0.95 },
+        0.15,
+      );
+    },
+    { scope: rootRef, dependencies: [title, subtitle] },
+  );
+
   return (
-    <motion.div
-      className={classNames(cls.head, {}, [className ?? ''])}
-      variants={containerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={VIEWPORT_ONCE}
-    >
-      <motion.h2
-        className={classNames(cls.kicker, {}, [])}
-        variants={textVariants}
-      >
+    <div ref={rootRef} className={classNames(cls.head, {}, [className ?? ''])}>
+      <h2 ref={kickerRef} className={classNames(cls.kicker, {}, [])}>
         {title}
-      </motion.h2>
-      <motion.span
-        className={classNames(cls.range, {}, [])}
-        variants={textVariants}
-      >
+      </h2>
+      <span ref={rangeRef} className={classNames(cls.range, {}, [])}>
         ({subtitle})
-      </motion.span>
-      <motion.span
-        className={classNames(cls.line, {}, [])}
-        variants={lineVariants}
-        aria-hidden="true"
-      />
-    </motion.div>
+      </span>
+      <span ref={lineRef} className={classNames(cls.line, {}, [])} aria-hidden="true" />
+    </div>
   )
 };
 

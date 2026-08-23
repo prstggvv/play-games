@@ -1,196 +1,167 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import cls from './WaySection.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
-import { VIEWPORT_ONCE } from '../../../../../shared/lib/motion';
+import {
+  gsap,
+  useGSAP,
+  isReducedMotion,
+  revealFadeUp,
+} from '../../../../../shared/lib/gsap';
 import TitleSecondPage from '../../../../../shared/ui/TitleSecondPage/TitleSecondPage';
+import {
+
+} from '../model/waySectionConst'
+import {
+  type Side,
+  VIEWBOX_W,
+  VIEWBOX_H,
+  PATH_D,
+  NODE_FADE,
+  TIMELINE,
+} from '../model/waySectionConst';
 
 interface IWaySection {
   className?: string;
 }
 
-interface IPoint {
-  x: number;
-  y: number;
-}
-
-interface ITimelineItem {
-  year: string;
-  role: string;
-  meta: string;
-  point: IPoint;
-  progress: number;
-  side: 'left' | 'right';
-}
-
-const VIEWBOX_W = 100;
-const VIEWBOX_H = 160;
-
-const PATH_D =
-  'M50 4 C50 10 28 10 28 16 C28 33 72 33 72 50 C72 67 28 67 28 84 C28 101 72 101 72 118 C72 134 28 134 28 150';
-
-const TIMELINE: ITimelineItem[] = [
-  {
-    year: '2018 — 2020',
-    role: 'Тренер по теннису, клуб Viccourt',
-    meta: 'г. Евпатория',
-    point: { x: 28, y: 16 },
-    progress: 0.1,
-    side: 'left',
-  },
-  {
-    year: 'Июнь — июль 2019',
-    role: 'Тренер Федерации тенниса России',
-    meta: 'Международный детский центр «Артек»',
-    point: { x: 72, y: 50 },
-    progress: 0.32,
-    side: 'right',
-  },
-  {
-    year: '2021 — 2024',
-    role: 'Тренер Федерации тенниса Республики Татарстан',
-    meta: 'Казанская академия тенниса · дети от 3 до 5 лет',
-    point: { x: 28, y: 84 },
-    progress: 0.52,
-    side: 'left',
-  },
-  {
-    year: '2023 — 2024',
-    role: 'Тренер экспериментальных групп Республики Татарстан',
-    meta: 'Казанская академия тенниса · дети 2013–2017 годов рождения',
-    point: { x: 72, y: 118 },
-    progress: 0.74,
-    side: 'right',
-  },
-  {
-    year: 'С 2024 — по сей день',
-    role: 'Тренер теннисного клуба «Пироговский»',
-    meta: 'Работаем здесь сейчас — приходите знакомиться',
-    point: { x: 28, y: 150 },
-    progress: 0.96,
-    side: 'left',
-  },
-];
-
-interface ICourtNodeProps {
-  point: IPoint;
-  progress: number;
-  scrollYProgress: MotionValue<number>;
-}
-
-const CourtNode = ({ point, progress, scrollYProgress }: ICourtNodeProps) => {
-  const opacity = useTransform(scrollYProgress, [progress - 0.09, progress], [0.18, 1]);
-  const ringOpacity = useTransform(scrollYProgress, [progress - 0.09, progress], [0, 0.55]);
-
-  return (
-    <g>
-      <motion.circle
-        cx={point.x}
-        cy={point.y}
-        r={5}
-        className={classNames(cls.nodeRing, {}, [])}
-        style={{ opacity: ringOpacity }}
-      />
-      <motion.circle
-        cx={point.x}
-        cy={point.y}
-        r={2.4}
-        className={classNames(cls.node, {}, [])}
-        style={{ opacity }}
-      />
-    </g>
-  );
-};
-
-const cardVariants = {
-  hidden: (side: 'left' | 'right') => ({
-    opacity: 0,
-    x: side === 'left' ? -44 : 44,
-  }),
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.7, ease: [0.23, 1, 0.36, 1] as const },
-  },
+const SIDE_CLASS: Record<Side, string> = {
+  right: cls.stopRight,
+  left: cls.stopLeft,
+  center: cls.stopCenter,
 };
 
 export const WaySection = ({ className }: IWaySection) => {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<SVGPathElement>(null);
+  const ballRef = useRef<SVGGElement>(null);
 
-  const { scrollYProgress } = useScroll({
-    target: trackRef,
-    offset: ['start 0.78', 'end 0.62'],
-  });
+  useGSAP(
+    () => {
+      gsap.utils.toArray<HTMLElement>(`.${cls.card}`).forEach((card) => {
+        revealFadeUp(card, { y: 22, duration: 0.7 });
+      });
 
-  const ballDistance = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+      if (isReducedMotion()) {
+        gsap.set(ballRef.current, { motionPath: { path: PATH_D, start: 0, end: 0 } });
+        return;
+      }
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: fieldRef.current,
+          start: 'top 80%',
+          end: 'bottom 62%',
+          scrub: 0.6,
+        },
+      });
+
+      tl.fromTo(
+        trailRef.current,
+        { drawSVG: '0%' },
+        { drawSVG: '100%', duration: 1 },
+        0,
+      ).to(
+        ballRef.current,
+        { motionPath: { path: PATH_D }, duration: 1, immediateRender: true },
+        0,
+      );
+
+      const nodes = gsap.utils.toArray<SVGGElement>(`.${cls.nodeGroup}`);
+
+      nodes.forEach((node, index) => {
+        const at = Math.max(0, TIMELINE[index].progress - NODE_FADE);
+
+        tl.fromTo(
+          node.querySelector(`.${cls.node}`),
+          { opacity: 0.2 },
+          { opacity: 1, duration: NODE_FADE },
+          at,
+        ).fromTo(
+          node.querySelector(`.${cls.nodeRing}`),
+          { opacity: 0 },
+          { opacity: 0.55, duration: NODE_FADE },
+          at,
+        );
+      });
+    },
+    { scope: sectionRef },
+  );
 
   return (
-    <section className={classNames(cls.section, {}, [className ?? ''])}>
+    <section
+      ref={sectionRef}
+      id="experience"
+      className={classNames(cls.section, {}, [className ?? ''])}
+    >
       <div className={classNames(cls.container, {}, [])}>
         <TitleSecondPage
           title='Путь на корте'
-          subtitle='Семь лет тренерской работы — от детских лагерей Крыма до академий и
-            клубов.'
+          subtitle='Семь лет тренерской работы — от детских лагерей Крыма до академий и клубов.'
           isWhite={true}
         />
 
-        <div ref={trackRef} className={classNames(cls.track, {}, [])}>
-          <div className={classNames(cls.court, {}, [])} aria-hidden="true">
-            <span className={classNames(cls.courtSingleLeft, {}, [])} />
-            <span className={classNames(cls.courtSingleRight, {}, [])} />
-            <span className={classNames(cls.courtServiceTop, {}, [])} />
-            <span className={classNames(cls.courtServiceBottom, {}, [])} />
-            <span className={classNames(cls.courtCenter, {}, [])} />
-            <span className={classNames(cls.courtNet, {}, [])} />
-          </div>
-
+        <div ref={fieldRef} className={classNames(cls.field, {}, [])}>
           <svg
             className={classNames(cls.svg, {}, [])}
             viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
-            preserveAspectRatio="xMidYMid meet"
-            aria-hidden="true"
+            preserveAspectRatio='xMidYMid meet'
+            aria-hidden='true'
           >
-            <path d={PATH_D} className={classNames(cls.trajectoryGhost, {}, [])} />
-            <motion.path
-              d={PATH_D}
-              className={classNames(cls.trajectory, {}, [])}
-              style={{ pathLength: scrollYProgress }}
-            />
+            <rect x={130} y={70} width={740} height={1260} rx={4} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={210} y1={70} x2={210} y2={1330} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={790} y1={70} x2={790} y2={1330} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={210} y1={470} x2={790} y2={470} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={210} y1={930} x2={790} y2={930} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={500} y1={470} x2={500} y2={930} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={490} y1={70} x2={510} y2={70} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={490} y1={1330} x2={510} y2={1330} className={classNames(cls.courtLine, {}, [])} />
+            <line x1={95} y1={700} x2={905} y2={700} className={classNames(cls.courtNet, {}, [])} />
+
+            <path d={PATH_D} className={classNames(cls.routeGhost, {}, [])} />
+            <path ref={trailRef} d={PATH_D} className={classNames(cls.routeTrail, {}, [])} />
 
             {TIMELINE.map((item) => (
-              <CourtNode
-                key={item.year}
-                point={item.point}
-                progress={item.progress}
-                scrollYProgress={scrollYProgress}
-              />
+              <g key={item.year} className={classNames(cls.nodeGroup, {}, [])}>
+                <circle
+                  cx={item.point.x}
+                  cy={item.point.y}
+                  r={16}
+                  className={classNames(cls.nodeRing, {}, [])}
+                />
+                <circle
+                  cx={item.point.x}
+                  cy={item.point.y}
+                  r={8}
+                  className={classNames(cls.node, {}, [])}
+                />
+              </g>
             ))}
 
-            <motion.g
-              style={{ offsetPath: `path("${PATH_D}")`, offsetDistance: ballDistance }}
-            >
-              <circle r={4.2} className={classNames(cls.ballGlow, {}, [])} />
-              <circle r={2.6} className={classNames(cls.ball, {}, [])} />
-              <path d="M-2.4 -1 Q0 1.4 2.4 -1" className={classNames(cls.ballSeam, {}, [])} />
-            </motion.g>
+            <g ref={ballRef}>
+              <circle r={22} className={classNames(cls.ballGlow, {}, [])} />
+              <circle r={12} className={classNames(cls.ball, {}, [])} />
+              <path d='M-8 -3 Q0 5 8 -3' className={classNames(cls.ballSeam, {}, [])} />
+            </g>
           </svg>
 
-          <ul className={classNames(cls.cards, {}, [])}>
+          <ul className={classNames(cls.stops, {}, [])}>
             {TIMELINE.map((item) => (
-              <motion.li
+              <li
                 key={item.year}
-                className={classNames(cls.card, { [cls.cardRight]: item.side === 'right' }, [])}
-                style={{ top: `${(item.point.y / VIEWBOX_H) * 100}%` }}
-                custom={item.side}
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={VIEWPORT_ONCE}
+                className={classNames(cls.stop, {}, [SIDE_CLASS[item.side]])}
+                style={{
+                  left: `${(item.point.x / VIEWBOX_W) * 100}%`,
+                  top: `${(item.point.y / VIEWBOX_H) * 100}%`,
+                }}
               >
-                <span className={classNames(cls.year, {}, [])}>{item.year}</span>
-                <span className={classNames(cls.role, {}, [])}>{item.role}</span>
-                <span className={classNames(cls.meta, {}, [])}>{item.meta}</span>
-              </motion.li>
+                <div className={classNames(cls.card, {}, [])}>
+                  <span className={classNames(cls.year, {}, [])}>{item.year}</span>
+                  <span className={classNames(cls.role, {}, [])}>{item.role}</span>
+                  <span className={classNames(cls.meta, {}, [])}>{item.meta}</span>
+                </div>
+              </li>
             ))}
           </ul>
         </div>
