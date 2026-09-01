@@ -1,10 +1,10 @@
-import { useRef, type MouseEvent } from 'react';
+import { useRef } from 'react';
 import cls from './Footer.module.css';
 import { classNames } from '../../../../shared/lib/classNames/classNames';
 import { revealFadeUp, useGSAP } from '../../../../shared/lib/gsap';
-import { scrollToSection } from '../../../../shared/lib/scrollToSection/scrollToSection';
-import { FOOTER_COLUMNS } from '../model/footerNav';
+import { handleSectionLinkClick } from '../../../../shared/lib/scrollToSection/scrollToSection';
 import {
+  FOOTER_LINKS,
   ABOUT_TEXT,
   COPYRIGHT,
 } from '../model/footerNav';
@@ -34,11 +34,6 @@ export const Footer = ({ className }: IFooterProps) => {
     },
     { scope: rootRef },
   );
-
-  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-    event.preventDefault();
-    scrollToSection(sectionId);
-  };
 
   return (
     <footer ref={rootRef} className={classNames(cls.footer, {}, [className ?? ''])}>
@@ -76,29 +71,25 @@ export const Footer = ({ className }: IFooterProps) => {
           </div>
         </div>
 
-        {FOOTER_COLUMNS.map((column) => (
-          <nav
-            key={column.title}
-            className={classNames(cls.col, {}, [cls.revealItem])}
-            aria-label={column.ariaLabel}
-          >
-            <h4 className={classNames(cls.colTitle, {}, [])}>{column.title}</h4>
-            <ul className={classNames(cls.colList, {}, [])}>
-              {column.links.map((link) => (
-                <li key={link.label}>
-                  <a
-                    className={classNames(cls.colLink, {}, [])}
-                    href={`#${link.sectionId}`}
-                    tabIndex={0}
-                    onClick={(event) => handleNavClick(event, link.sectionId)}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
+        <nav
+          className={classNames(cls.col, {}, [cls.revealItem])}
+          aria-label="Навигация по сайту"
+        >
+          <ul className={classNames(cls.colList, {}, [])}>
+            {FOOTER_LINKS.map((link) => (
+              <li key={link.label}>
+                <a
+                  className={classNames(cls.colLink, {}, [])}
+                  href={`#${link.sectionId}`}
+                  tabIndex={0}
+                  onClick={(event) => handleSectionLinkClick(event, link.sectionId)}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
 
       <div className={classNames(cls.legal, {}, [])}>

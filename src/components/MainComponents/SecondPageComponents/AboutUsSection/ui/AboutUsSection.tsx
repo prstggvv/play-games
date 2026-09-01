@@ -75,7 +75,7 @@ export const AboutUsSection = ({ className }: IAboutUsSection) => {
           </p>
         </div>
 
-        <div className={classNames(cls.coaches, {}, [])}>
+        <div id="coaches" className={classNames(cls.coaches, {}, [])}>
           {aboutUsItems.map((coach) => (
             <CoachCard key={coach.name} coach={coach} />
           ))}

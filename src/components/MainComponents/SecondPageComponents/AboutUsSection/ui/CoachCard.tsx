@@ -18,6 +18,7 @@ import {
   START_DEEP,
 } from '../../../../../shared/lib/gsap';
 import { useFontsReady } from '../../../../../shared/lib/hooks/useFontsReady';
+import { handleSectionLinkClick } from '../../../../../shared/lib/scrollToSection/scrollToSection';
 import type { ICoach } from '../model/aboutUsItems';
 
 interface ICoachCardProps {
@@ -109,12 +110,18 @@ export const CoachCard = ({ coach }: ICoachCardProps) => {
   return (
     <article
       ref={cardRef}
+      id={coach.id}
       className={classNames(cls.tcoach, { [cls.reverse]: isReversed }, [])}
     >
       <div className={classNames(cls.tcPanel, {}, [])}>
         <div className={classNames(cls.tcTop, {}, [])}>
           <h3 ref={nameRef} className={classNames(cls.tcName, {}, [])}>
-            <span className={classNames(cls.n1, {}, [])}>{coach.surname}</span>
+            <span className={classNames(cls.n1, {}, [])}>
+              {coach.surname}
+              {coach.surnameAlt && (
+                <span className={classNames(cls.n1Alt, {}, [])}>({coach.surnameAlt})</span>
+              )}
+            </span>
             <span className={classNames(cls.n2, {}, [])}>{coach.name}</span>
           </h3>
         </div>
@@ -125,7 +132,7 @@ export const CoachCard = ({ coach }: ICoachCardProps) => {
 
       <div ref={photoRef} className={classNames(cls.tcPhoto, {}, [])}>
         <img
-          className={classNames(cls.tcPhotoImg, {}, [])}
+          className={cls.tcPhotoImg}
           ref={imgRef}
           src={coach.photo}
           alt={coach.alt} />
@@ -141,8 +148,10 @@ export const CoachCard = ({ coach }: ICoachCardProps) => {
       >
         <a
           className={classNames(cls.tcCta, {}, [])}
-          href={coach.ctaHref}
+          href={`#${coach.ctaSectionId}`}
+          tabIndex={0}
           aria-label={`${coach.ctaLabel} — ${coach.surname} ${coach.name}`}
+          onClick={(event) => handleSectionLinkClick(event, coach.ctaSectionId)}
         >
           <span className={classNames(cls.ctaFoot, {}, [])}>
             <span className={classNames(cls.ctaLabel, {}, [])}>{coach.ctaLabel}</span>

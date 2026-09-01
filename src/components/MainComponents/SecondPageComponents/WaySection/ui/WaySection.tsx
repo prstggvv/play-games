@@ -9,9 +9,6 @@ import {
 } from '../../../../../shared/lib/gsap';
 import TitleSecondPage from '../../../../../shared/ui/TitleSecondPage/TitleSecondPage';
 import {
-
-} from '../model/waySectionConst'
-import {
   type Side,
   VIEWBOX_W,
   VIEWBOX_H,
@@ -38,52 +35,66 @@ export const WaySection = ({ className }: IWaySection) => {
 
   useGSAP(
     () => {
-      gsap.utils.toArray<HTMLElement>(`.${cls.card}`).forEach((card) => {
-        revealFadeUp(card, { y: 22, duration: 0.7 });
-      });
+      const mm = gsap.matchMedia();
 
-      if (isReducedMotion()) {
-        gsap.set(ballRef.current, { motionPath: { path: PATH_D, start: 0, end: 0 } });
-        return;
-      }
+      mm.add('(min-width: 769px)', () => {
+        gsap.utils.toArray<HTMLElement>(`.${cls.stop} .${cls.card}`).forEach((card) => {
+          revealFadeUp(card, { y: 22, duration: 0.7 });
+        });
 
-      const tl = gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: fieldRef.current,
-          start: 'top 80%',
-          end: 'bottom 62%',
-          scrub: 0.6,
-        },
-      });
+        if (isReducedMotion()) {
+          gsap.set(ballRef.current, { motionPath: { path: PATH_D, start: 0, end: 0 } });
+          return;
+        }
 
-      tl.fromTo(
-        trailRef.current,
-        { drawSVG: '0%' },
-        { drawSVG: '100%', duration: 1 },
-        0,
-      ).to(
-        ballRef.current,
-        { motionPath: { path: PATH_D }, duration: 1, immediateRender: true },
-        0,
-      );
-
-      const nodes = gsap.utils.toArray<SVGGElement>(`.${cls.nodeGroup}`);
-
-      nodes.forEach((node, index) => {
-        const at = Math.max(0, TIMELINE[index].progress - NODE_FADE);
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: fieldRef.current,
+            start: 'top 80%',
+            end: 'bottom 62%',
+            scrub: 0.6,
+          },
+        });
 
         tl.fromTo(
-          node.querySelector(`.${cls.node}`),
-          { opacity: 0.2 },
-          { opacity: 1, duration: NODE_FADE },
-          at,
-        ).fromTo(
-          node.querySelector(`.${cls.nodeRing}`),
-          { opacity: 0 },
-          { opacity: 0.55, duration: NODE_FADE },
-          at,
+          trailRef.current,
+          { drawSVG: '0%' },
+          { drawSVG: '100%', duration: 1 },
+          0,
+        ).to(
+          ballRef.current,
+          { motionPath: { path: PATH_D }, duration: 1, immediateRender: true },
+          0,
         );
+
+        const nodes = gsap.utils.toArray<SVGGElement>(`.${cls.nodeGroup}`);
+
+        nodes.forEach((node, index) => {
+          const at = Math.max(0, TIMELINE[index].progress - NODE_FADE);
+
+          tl.fromTo(
+            node.querySelector(`.${cls.node}`),
+            { opacity: 0.2 },
+            { opacity: 1, duration: NODE_FADE },
+            at,
+          ).fromTo(
+            node.querySelector(`.${cls.nodeRing}`),
+            { opacity: 0 },
+            { opacity: 0.55, duration: NODE_FADE },
+            at,
+          );
+        });
+      });
+
+      mm.add('(max-width: 768px)', () => {
+        revealFadeUp(`.${cls.item}`, {
+          trigger: sectionRef.current,
+          start: 'top 78%',
+          y: 40,
+          duration: 0.7,
+          stagger: 0.12,
+        });
       });
     },
     { scope: sectionRef },
@@ -102,7 +113,7 @@ export const WaySection = ({ className }: IWaySection) => {
           isWhite={true}
         />
 
-        <div ref={fieldRef} className={classNames(cls.field, {}, [])}>
+        <div ref={fieldRef} className={classNames(cls.field, {}, [])} aria-hidden='true'>
           <svg
             className={classNames(cls.svg, {}, [])}
             viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
@@ -165,6 +176,22 @@ export const WaySection = ({ className }: IWaySection) => {
             ))}
           </ul>
         </div>
+
+        <ol className={classNames(cls.timeline, {}, [])}>
+          {TIMELINE.map((item) => (
+            <li key={item.year} className={classNames(cls.item, {}, [])}>
+              <div className={classNames(cls.marker, {}, [])} aria-hidden='true'>
+                <span className={classNames(cls.dot, {}, [])} />
+              </div>
+
+              <div className={classNames(cls.card, {}, [])}>
+                <span className={classNames(cls.year, {}, [])}>{item.year}</span>
+                <span className={classNames(cls.role, {}, [])}>{item.role}</span>
+                <span className={classNames(cls.meta, {}, [])}>{item.meta}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import cls from './PageLoader.module.css';
 import { classNames } from '../../../lib/classNames/classNames';
 import { gsap, useGSAP } from '../../../lib/gsap';
@@ -12,23 +12,39 @@ interface IPageLoaderProps {
 
 type Stage = 'loading' | 'wiping' | 'done';
 
-const RING_RADIUS = 52;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+const SCORE_STEPS = ['0', '15', '30', '40', 'GAME'] as const;
 
-// Bands overshoot both edges (< 0 and > 100) so the displaced brush strokes
-// always cover the full viewport height — no unrevealed strip left at top/bottom.
-const BRUSH_BANDS = [-8, 8, 24, 40, 56, 72, 88, 104];
+const DESKTOP_GRID = { cols: 8, rows: 5 };
+const MOBILE_GRID = { cols: 4, rows: 7 };
+
+const TILE_DURATION = 0.5;
+const COLUMN_STEP = 0.05;
+const ROW_STEP = 0.022;
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-export const PageLoader = ({ onFinish, minDuration = 1700, className }: IPageLoaderProps) => {
+const getScoreIndex = (progress: number) => {
+  if (progress >= 100) return SCORE_STEPS.length - 1;
+  return Math.min(SCORE_STEPS.length - 2, Math.floor(progress / 25));
+};
+
+export const PageLoader = ({ onFinish, minDuration = 400, className }: IPageLoaderProps) => {
   const [stage, setStage] = useState<Stage>('loading');
   const [progress, setProgress] = useState(0);
   const reduced = useRef(prefersReducedMotion());
   const isMobile = useIsMobile();
-  const maskRef = useRef<SVGGElement>(null);
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const tilesRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const reelRef = useRef<HTMLDivElement>(null);
+
+  const { cols, rows } = isMobile ? MOBILE_GRID : DESKTOP_GRID;
+  const tiles = useMemo(() => Array.from({ length: cols * rows }, (_, index) => index), [cols, rows]);
+  const scoreIndex = getScoreIndex(progress);
+
   useEffect(() => {
     let raf = 0;
     let current = 0;
@@ -42,11 +58,11 @@ export const PageLoader = ({ onFinish, minDuration = 1700, className }: IPageLoa
 
     const tick = (now: number) => {
       const elapsed = now - start;
-      const timeTarget = Math.min(95, (elapsed / minDuration) * 100);
-      const target = loaded && elapsed >= minDuration ? 100 : Math.min(timeTarget, 95);
+      const timeTarget = Math.min(92, (elapsed / minDuration) * 100);
+      const target = loaded && elapsed >= minDuration ? 100 : timeTarget;
 
-      current += (target - current) * 0.08;
-      if (target === 100 && 100 - current < 0.4) current = 100;
+      current += (target - current) * 0.14;
+      if (target === 100 && 100 - current < 1) current = 100;
 
       setProgress(Math.round(current));
 
@@ -64,37 +80,64 @@ export const PageLoader = ({ onFinish, minDuration = 1700, className }: IPageLoa
     };
   }, [minDuration]);
 
-  useEffect(() => {
-    if (stage !== 'wiping') return;
-    const wipeDuration = isMobile ? 600 : reduced.current ? 550 : 1550;
-    const timer = window.setTimeout(() => {
-      setStage('done');
-      onFinish?.();
-    }, wipeDuration);
-    return () => window.clearTimeout(timer);
-  }, [stage, onFinish, isMobile]);
+  useGSAP(
+    () => {
+      if (!reelRef.current) return;
+
+      gsap.to(reelRef.current, {
+        yPercent: -scoreIndex * (100 / SCORE_STEPS.length),
+        duration: reduced.current ? 0 : 0.42,
+        ease: 'power3.out',
+        overwrite: true,
+      });
+    },
+    { dependencies: [scoreIndex] },
+  );
 
   useGSAP(
     () => {
-      if (!maskRef.current) return;
+      if (stage !== 'wiping' || !rootRef.current || !tilesRef.current || !contentRef.current) return;
 
-      if (stage !== 'wiping') {
-        gsap.set(maskRef.current.children, { drawSVG: '0%' });
+      const finish = () => {
+        setStage('done');
+        onFinish?.();
+      };
+
+      if (reduced.current) {
+        gsap.to(rootRef.current, {
+          autoAlpha: 0,
+          duration: 0.35,
+          ease: 'power2.out',
+          onComplete: finish,
+        });
         return;
       }
 
-      gsap.fromTo(
-        maskRef.current.children,
-        { drawSVG: '0%' },
-        {
-          drawSVG: '100%',
-          duration: reduced.current ? 0.5 : 0.95,
-          ease: 'power4.inOut',
-          stagger: 0.06,
-        },
-      );
+      gsap
+        .timeline({ onComplete: finish })
+        .to(contentRef.current, {
+          autoAlpha: 0,
+          y: -14,
+          duration: 0.26,
+          ease: 'power2.in',
+        })
+        .to(
+          tilesRef.current.children,
+          {
+            yPercent: 118,
+            autoAlpha: 0,
+            duration: TILE_DURATION,
+            ease: 'power3.in',
+            stagger: (index: number) => {
+              const column = index % cols;
+              const row = Math.floor(index / cols);
+              return column * COLUMN_STEP + row * ROW_STEP;
+            },
+          },
+          '-=0.1',
+        );
     },
-    { dependencies: [stage] },
+    { scope: rootRef, dependencies: [stage] },
   );
 
   useEffect(() => {
@@ -109,103 +152,56 @@ export const PageLoader = ({ onFinish, minDuration = 1700, className }: IPageLoa
 
   if (stage === 'done') return null;
 
-  const isWiping = stage === 'wiping';
-  const dashOffset = RING_CIRCUMFERENCE * (1 - progress / 100);
-
   return (
     <div
-      className={classNames(cls.loader, { [cls.wiping]: isWiping, [cls.mobile]: isMobile }, [
-        className ?? '',
-      ])}
+      ref={rootRef}
+      className={classNames(cls.loader, { [cls.mobile]: isMobile }, [className ?? ''])}
       role="progressbar"
-      aria-busy={!isWiping}
+      aria-busy={stage === 'loading'}
       aria-live="polite"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={progress}
       aria-label="Загрузка сайта"
     >
-      {!isMobile && (
-        <svg
-          className={cls.wipeLayer}
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-        <defs>
-          <filter id="pl-brush" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.012 0.14"
-              numOctaves={2}
-              seed={7}
-              result="noise"
-            />
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
-              scale={reduced.current ? 0 : 14}
-              xChannelSelector="R"
-              yChannelSelector="G"
-            />
-          </filter>
-          <mask id="pl-mask" maskUnits="userSpaceOnUse">
-            <rect x="0" y="0" width="100" height="100" fill="#fff" />
-            <g ref={maskRef} filter="url(#pl-brush)">
-              {BRUSH_BANDS.map((y) => (
-                <path
-                  key={y}
-                  d={`M -12 ${y} C 25 ${y - 4}, 55 ${y + 5}, 112 ${y - 2}`}
-                  stroke="#000"
-                  strokeWidth={20}
-                  strokeLinecap="round"
-                  fill="none"
-                  className={classNames(cls.band, {}, [])}
-                />
+      <div
+        ref={tilesRef}
+        className={cls.tiles}
+        style={{ '--pl-cols': cols, '--pl-rows': rows } as CSSProperties}
+        aria-hidden="true"
+      >
+        {tiles.map((index) => (
+          <span key={index} className={cls.tile} />
+        ))}
+      </div>
+
+      <div ref={contentRef} className={cls.content}>
+        <span className={cls.brand}>Еркеева Александра</span>
+
+        <div className={cls.panel}>
+          <div className={cls.score} aria-hidden="true">
+            <div ref={reelRef} className={cls.reel}>
+              {SCORE_STEPS.map((step, index) => (
+                <span
+                  key={step}
+                  className={classNames(cls.scoreItem, { [cls.scoreItemActive]: index === scoreIndex }, [])}
+                >
+                  {step}
+                </span>
               ))}
-            </g>
-          </mask>
-        </defs>
-          <rect
-            x="0"
-            y="0"
-            width="100"
-            height="100"
-            fill="var(--color-cream)"
-            mask="url(#pl-mask)"
-          />
-        </svg>
-      )}
-      <div className={cls.content}>
-        <div className={cls.ringWrap}>
-          <svg className={cls.ring} viewBox="0 0 120 120" aria-hidden="true">
-            <circle
-              className={cls.ringTrack}
-              cx="60"
-              cy="60"
-              r={RING_RADIUS}
-              fill="none"
-            />
-            <circle
-              className={cls.ringProgress}
-              cx="60"
-              cy="60"
-              r={RING_RADIUS}
-              fill="none"
-              strokeDasharray={RING_CIRCUMFERENCE}
-              strokeDashoffset={dashOffset}
-            />
-            <circle
-              className={cls.ringSpark}
-              cx="60"
-              cy="60"
-              r={RING_RADIUS}
-              fill="none"
-              strokeDasharray={`${RING_CIRCUMFERENCE * 0.12} ${RING_CIRCUMFERENCE}`}
-            />
-          </svg>
+            </div>
+          </div>
+
+          <div className={cls.track} aria-hidden="true">
+            <span className={cls.trackFill} style={{ transform: `scaleX(${progress / 100})` }} />
+            <span className={cls.ball} style={{ left: `${progress}%` }} />
+          </div>
+
+          <div className={cls.meta} aria-hidden="true">
+            <span className={cls.metaLabel}>Loading</span>
+            <span className={cls.metaValue}>{progress}%</span>
+          </div>
         </div>
-        <span className={cls.label}>Еркеева Александра</span>
       </div>
     </div>
   );

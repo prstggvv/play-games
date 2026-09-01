@@ -2,34 +2,39 @@ import sashaPhoto from '../../../../../shared/assets/images/secondPage/about/sas
 import ernestPhoto from '../../../../../shared/assets/images/secondPage/about/ernest.jpg';
 
 export interface ICoach {
+  id: string;
   surname: string;
+  surnameAlt?: string;
   name: string;
   desc: string;
   photo: string;
   alt: string;
   ctaLabel: string;
-  ctaHref: string;
+  ctaSectionId: string;
   reverse?: boolean;
 }
 
 export const aboutUsItems: ICoach[] = [
   {
+    id: 'coach-alexandra',
     surname: 'Еркеева',
+    surnameAlt: 'Чернышева',
     name: 'Александра',
-    desc: 'Внимание, терпение и игра — в каждой тренировке. Строит занятия так, чтобы ребёнок полюбил теннис и рос уверенно — от первого касания ракетки до уверенной подачи.',
+    desc: 'Тренер и спортивный психолог - с опытом работы от «Артека» до Казани. Бакалавр физической культуры ПГУФКСиТ, магистратура «Спорт», курсы Федерации тенниса России. Работает с самыми младшими: помогает справиться с волнением, поверить в себя и полюбить корт.',
     photo: sashaPhoto,
-    alt: 'Еркеева Александра',
+    alt: 'Еркеева (Чернышева) Александра',
     ctaLabel: 'Образование',
-    ctaHref: '#education',
+    ctaSectionId: 'education',
   },
   {
+    id: 'coach-ernest',
     surname: 'Еркеев',
     name: 'Эрнест',
-    desc: 'Опыт работы в федерациях и академиях — от «Артека» до Казани. Ставит технику и игровое мышление — от первых шагов на корте до соревновательного уровня.',
+    desc: 'Тренер с опытом работы в федерациях и академиях. Выпускник РГУФКСиТ, прошёл курсы Федерации тенниса России до Level 1. Ставит технику и игровое мышление — от первых шагов на корте до соревновательного уровня.',
     photo: ernestPhoto,
     alt: 'Еркеев Эрнест',
     ctaLabel: 'Образование',
-    ctaHref: '#education',
+    ctaSectionId: 'education',
     reverse: true,
   },
 ];

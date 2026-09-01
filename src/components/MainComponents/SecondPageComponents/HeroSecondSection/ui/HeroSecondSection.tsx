@@ -2,6 +2,8 @@ import { useRef } from 'react';
 import cls from './HeroSecondSection.module.css';
 import { classNames } from '../../../../../shared/lib/classNames/classNames';
 import { gsap, useGSAP, isMotionDisabled, EASE_OUT } from '../../../../../shared/lib/gsap';
+import { handleSectionLinkClick } from '../../../../../shared/lib/scrollToSection/scrollToSection';
+import { HERO_NAV_LINKS } from '../model/heroNav';
 import heroPhoto from '../../../../../shared/assets/images/secondPage/hero.jpg';
 import {
   VK_LINK,
@@ -64,30 +66,18 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
         </div>
 
         <nav className={classNames(cls.tab, {}, [cls.tabTr])} aria-label="Навигация">
-          <a
-            className={classNames(cls.pill, {}, [cls.reveal])}
-            href="#about"
-            tabIndex={0}
-            aria-label="О нас"
-          >
-            О нас
-          </a>
-          <a
-            className={classNames(cls.pill, {}, [cls.reveal])}
-            href="#about"
-            tabIndex={0}
-            aria-label="Тренеры"
-          >
-            Тренеры
-          </a>
-          <a
-            className={classNames(cls.pill, {}, [cls.reveal])}
-            href="#contact"
-            tabIndex={0}
-            aria-label="Контакты"
-          >
-            Контакты
-          </a>
+          {HERO_NAV_LINKS.map((link) => (
+            <a
+              key={link.label}
+              className={classNames(cls.pill, {}, [cls.reveal])}
+              href={`#${link.sectionId}`}
+              tabIndex={0}
+              aria-label={link.label}
+              onClick={(event) => handleSectionLinkClick(event, link.sectionId)}
+            >
+              {link.label}
+            </a>
+          ))}
         </nav>
 
         <a
@@ -102,7 +92,7 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
 
         <div className={classNames(cls.text, {}, [])}>
           <h1 className={classNames(cls.title, {}, [cls.reveal])}>
-            <span className={classNames(cls.titleL1, {}, [])}>Большой теннис</span>
+            <span className={classNames(cls.titleL1, {}, [])}>Теннис</span>
             <span className={classNames(cls.titleL2, {}, [])}>для маленьких</span>
           </h1>
           <p className={classNames(cls.sub, {}, [cls.reveal])}>

@@ -3,37 +3,18 @@ export interface IFooterLink {
   sectionId: string;
 }
 
-export interface IFooterColumn {
-  title: string;
-  ariaLabel: string;
-  links: IFooterLink[];
-}
-
 export const ABOUT_TEXT =
   'Детский теннисный клуб «Пироговский». Учим детей любить теннис — спокойно, по делу и с вниманием к каждому ребёнку. От первого касания ракетки до уверенной подачи.';
 
 export const COPYRIGHT = '© 2026 Клуб «Пироговский»';
 
-
-export const FOOTER_COLUMNS: IFooterColumn[] = [
-  {
-    title: 'Разделы',
-    ariaLabel: 'Разделы',
-    links: [
-      { label: 'О нас', sectionId: 'about' },
-      { label: 'Тренеры', sectionId: 'about' },
-      { label: 'Путь на корте', sectionId: 'experience' },
-      { label: 'Образование', sectionId: 'education' },
-      { label: 'Контакты', sectionId: 'contact' },
-    ],
-  },
-  {
-    title: 'Тренеры',
-    ariaLabel: 'Тренеры',
-    links: [
-      { label: 'Еркеева Александра', sectionId: 'about' },
-      { label: 'Еркеев Эрнест', sectionId: 'about' },
-      { label: 'Записаться', sectionId: 'contact' },
-    ],
-  },
+export const FOOTER_LINKS: IFooterLink[] = [
+  { label: 'О нас', sectionId: 'about' },
+  { label: 'Тренеры', sectionId: 'coaches' },
+  { label: 'Еркеева Александра', sectionId: 'coach-alexandra' },
+  { label: 'Еркеев Эрнест', sectionId: 'coach-ernest' },
+  { label: 'Путь на корте', sectionId: 'experience' },
+  { label: 'Образование', sectionId: 'education' },
+  { label: 'Контакты', sectionId: 'contact' },
+  { label: 'Записаться', sectionId: 'contact' },
 ];
