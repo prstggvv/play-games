@@ -20,10 +20,6 @@
   text-decoration: none;
 }
 
-.section a:hover {
-  color: var(--color-ball);
-}
-
 .bg {
   position: absolute;
   left: 0;
