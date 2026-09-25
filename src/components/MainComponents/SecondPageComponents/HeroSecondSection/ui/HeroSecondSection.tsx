@@ -10,6 +10,9 @@ import {
   TG_LINK,
   MAIL_LINK,
 } from '../../../../../shared/lib/constants/index';
+import OutlookIcon from '../../../../../shared/ui/icons/OutlookIcon/OutlookIcon';
+import TelegramIcon from '../../../../../shared/ui/icons/TelegramIcon/TelegramIcon';
+import VkIcon from '../../../../../shared/ui/icons/VkIcon/VkIcon';
 
 interface IHeroSecondSectionProps {
   className?: string;
@@ -114,9 +117,7 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
               tabIndex={0}
               aria-label="ВКонтакте"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M13.05 18.36c-6.03 0-9.9-4.13-10.05-11h3.03c.1 5.04 2.42 7.2 4.2 7.64V7.36h2.86v4.28c1.72-.18 3.53-2.11 4.14-4.28h2.85c-.47 2.66-2.4 4.59-3.77 5.38 1.37.64 3.57 2.33 4.42 5.62h-3.14c-.66-2.05-2.3-3.64-4.5-3.85v3.85h-.99z" />
-              </svg>
+              <VkIcon />
             </a>
             <a
               className={classNames(cls.socLink, {}, [])}
@@ -126,9 +127,7 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
               tabIndex={0}
               aria-label="Telegram"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M21.94 4.66c.26-1.08-.79-1.94-1.8-1.53L2.7 10.05c-1.2.47-1.15 2.2.08 2.6l4.32 1.42 1.63 5.02c.2.63 1 .82 1.47.35l2.37-2.34 4.28 3.15c.7.51 1.7.13 1.88-.72l3.21-14.87zM7.7 13.1l8.9-5.48-6.95 6.32c-.16.15-.27.35-.31.57l-.32 2.26-1.32-3.67z" />
-              </svg>
+              <TelegramIcon />
             </a>
             <a
               className={classNames(cls.socLink, {}, [])}
@@ -136,10 +135,7 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
               tabIndex={0}
               aria-label="Почта"
             >
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="3" y="5.5" width="18" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-                <path d="M4 7l8 5.5L20 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
+              <OutlookIcon />
             </a>
           </div>
         </div>
