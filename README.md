@@ -15,7 +15,7 @@
 
 ## Статус проекта
 
-В разработке
+Готовый (в процессе работы, допустимы правки)
 
 ---
 
@@ -31,15 +31,14 @@ https://tennisduo.ru
 
 ## Используемые технологии
 
-- ReactJS
-- JavaScript
-- TypeScript
-- HTML
-- Module.css
-- Cursor
-- n8n
-- framer-motion
-- CLAUDE DESIGN
+- *ReactJS*
+- *JavaScript*
+- *TypeScript*
+- *HTML*
+- *Module.css*
+- *GSAP*
+- *CLAUDE* 
+- *FIGMA*
 
 ---
 
