@@ -88,9 +88,9 @@ export const HeroSecondSection = ({ className }: IHeroSecondSectionProps) => {
           href="https://vk.ru/id138932826"
           target='_blank'
           tabIndex={0}
-          aria-label="Записаться на тренировку"
+          aria-label='Записаться на тренировку'
         >
-          Записаться
+          Записаться на курс
         </a>
 
         <div className={classNames(cls.text, {}, [])}>
